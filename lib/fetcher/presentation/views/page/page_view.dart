@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:my_chat/fetcher/presentation/views/page/data/pageview_data.dart';
 import 'package:my_chat/fetcher/presentation/views/page/widget/background_page.dart';
@@ -15,7 +13,6 @@ class PageViewMyChat extends StatefulWidget {
 class _PageViewMyChatState extends State<PageViewMyChat> {
   final PageController _controller = PageController(initialPage: 0);
   int _currentIndex = 0;
-  final _pageIndexNotifier = ValueNotifier<int>(0);
 
   @override
   void initState() {

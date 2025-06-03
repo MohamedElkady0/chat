@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:my_chat/fetcher/presentation/views/page/page_view.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/selection_auth.dart';
 import 'firebase_options.dart';
 
 void main() async {
@@ -52,7 +52,7 @@ class ChatMy extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: PageViewMyChat(),
+      home: SelectionAuth(),
     );
   }
 }
