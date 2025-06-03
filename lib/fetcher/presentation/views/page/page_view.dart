@@ -42,6 +42,7 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
         floatingActionButton:
             _currentIndex < pageViewData.length - 1
                 ? FloatingActionButton(
+                  backgroundColor: Colors.blueAccent,
                   onPressed: () {
                     _controller.animateToPage(
                       _currentIndex + 1,

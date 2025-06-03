@@ -1,10 +1,59 @@
 import 'package:flutter/material.dart';
+import 'package:my_chat/core/theme/color_theme_app.dart';
+import 'package:my_chat/core/utils/auth_string.dart';
 
-class ForgetPasswordPage extends StatelessWidget {
+import '../widget/app_bar_auth.dart';
+import '../widget/button_auth.dart';
+import '../widget/input_field_auth.dart';
+
+class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
 
   @override
+  State<ForgetPasswordPage> createState() => _ForgetPasswordPageState();
+}
+
+class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
+  TextEditingController emailController = TextEditingController();
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBarAuth(title: 'Password Recovery'),
+        backgroundColor: ColorThemeApp.backgroundColor,
+        extendBodyBehindAppBar: true,
+        body: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                Image.asset(
+                  AuthString.forgetpasswordImage,
+                  height: MediaQuery.of(context).size.height * 0.3,
+                ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                InputFieldAuth(
+                  controller: emailController,
+                  title: 'Email',
+                  icon: Icons.email,
+                  obscureText: false,
+                ),
+
+                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                ButtonAuth(title: AuthString.resetPassword, icon: Icons.login),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
