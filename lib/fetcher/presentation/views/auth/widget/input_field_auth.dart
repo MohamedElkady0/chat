@@ -63,6 +63,7 @@ class InputFieldAuth extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       decoration: InputDecoration(
+        labelStyle: const TextStyle(color: Colors.grey),
         labelText: title,
         prefixIcon: IconButton(onPressed: onPressed, icon: Icon(icon)),
         border: const OutlineInputBorder(),

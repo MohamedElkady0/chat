@@ -84,7 +84,7 @@ class _InputPhoneState extends State<InputPhone> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.only(left: 10),
-      height: MediaQuery.of(context).size.height * .08,
+      height: MediaQuery.of(context).size.height * .09,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         color: Colors.grey[900],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:my_chat/fetcher/presentation/views/auth/view/forget_password_page.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/register_page.dart';
+
 import 'firebase_options.dart';
 
 void main() async {
@@ -52,7 +53,7 @@ class ChatMy extends StatelessWidget {
         ),
       ),
       themeMode: ThemeMode.system,
-      home: ForgetPasswordPage(),
+      home: RegisterPage(),
     );
   }
 }

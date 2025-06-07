@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:my_chat/fetcher/presentation/views/page/data/pageview_data.dart';
-import 'package:my_chat/fetcher/presentation/views/page/widget/background_page.dart';
-import 'package:my_chat/fetcher/presentation/views/page/widget/blur_background.dart';
+import 'package:my_chat/fetcher/presentation/views/Introduction/data/pageview_data.dart';
+import 'package:my_chat/fetcher/presentation/views/Introduction/widget/background_page.dart';
+import 'package:my_chat/fetcher/presentation/views/Introduction/widget/blur_background.dart';
 
 class PageViewMyChat extends StatefulWidget {
   const PageViewMyChat({super.key});

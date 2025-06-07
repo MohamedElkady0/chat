@@ -21,6 +21,7 @@ class _RegisterPageState extends State<RegisterPage> {
   TextEditingController confirmPasswordController = TextEditingController();
   bool visibility = false;
   bool visibilityConfirm = false;
+  bool agree = false;
 
   @override
   void dispose() {
@@ -86,6 +87,7 @@ class _RegisterPageState extends State<RegisterPage> {
                         visibilityConfirm = !visibilityConfirm;
                       }),
                 ),
+                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
 
                 SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                 ButtonAuth(title: 'Register', icon: Icons.person_add),
