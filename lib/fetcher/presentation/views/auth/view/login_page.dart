@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:my_chat/core/config/config_app.dart';
+import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/app_bar_auth.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/input_field_auth.dart';
-
-import '../../../../../core/theme/color_theme_app.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -26,24 +26,27 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    ConfigApp.initConfig(context);
+    double height = ConfigApp.height;
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBarAuth(title: 'Login'),
-        backgroundColor: ColorThemeApp.backgroundColor,
+        backgroundColor: Theme.of(context).primaryColor,
         extendBodyBehindAppBar: true,
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: AppSpacing.horizontalM,
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                SizedBox(height: height * 0.2),
                 InputFieldAuth(
                   controller: emailController,
                   title: 'Email',
                   icon: Icons.email,
                   obscureText: false,
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.02),
+                SizedBox(height: height * 0.02),
                 InputFieldAuth(
                   controller: passwordController,
                   title: 'Password',
@@ -55,9 +58,9 @@ class _LoginPageState extends State<LoginPage> {
                         visibility = !visibility;
                       }),
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.05),
+                SizedBox(height: height * 0.05),
                 TextButton(onPressed: () {}, child: Text('Forget Password ?')),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 ButtonAuth(title: 'Login', icon: Icons.login),
               ],
             ),

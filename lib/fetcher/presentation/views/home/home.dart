@@ -13,7 +13,10 @@ class HomePage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('إدارة السمات'),
+        title: Text(
+          'إدارة السمات',
+          style: Theme.of(context).textTheme.displayLarge,
+        ),
         actions: [
           Switch(
             value: isDark,
@@ -49,7 +52,13 @@ class HomePage extends StatelessWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
               const SizedBox(height: 24),
-              ElevatedButton(onPressed: () {}, child: const Text('زر أساسي')),
+              ElevatedButton(
+                onPressed: () {},
+                child: Text(
+                  'زر أساسي',
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+              ),
             ],
           ),
         ),

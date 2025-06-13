@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:my_chat/fetcher/presentation/views/auth/widget/text_auth.dart';
 
-import '../../../../../core/theme/color_theme_app.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/text_auth.dart';
 
 class AppBarAuth extends StatelessWidget implements PreferredSizeWidget {
   const AppBarAuth({super.key, required this.title});
@@ -15,7 +14,7 @@ class AppBarAuth extends StatelessWidget implements PreferredSizeWidget {
       actions: [Image.asset('assets/images/slack.png')],
 
       centerTitle: true,
-      backgroundColor: ColorThemeApp.backgroundColor,
+      backgroundColor: Theme.of(context).primaryColor,
     );
   }
 

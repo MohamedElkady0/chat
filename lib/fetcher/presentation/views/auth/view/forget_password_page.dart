@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:my_chat/core/theme/color_theme_app.dart';
+import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/utils/auth_string.dart';
 
 import '../widget/app_bar_auth.dart';
@@ -24,22 +24,25 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
   @override
   Widget build(BuildContext context) {
+    ConfigApp.initConfig(context);
+    double height = ConfigApp.height;
+
     return SafeArea(
       child: Scaffold(
         appBar: AppBarAuth(title: 'Password Recovery'),
-        backgroundColor: ColorThemeApp.backgroundColor,
+        backgroundColor: Theme.of(context).primaryColor,
         extendBodyBehindAppBar: true,
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 Image.asset(
                   AuthString.forgetpasswordImage,
-                  height: MediaQuery.of(context).size.height * 0.3,
+                  height: height * 0.3,
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 InputFieldAuth(
                   controller: emailController,
                   title: 'Email',
@@ -47,7 +50,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                   obscureText: false,
                 ),
 
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 ButtonAuth(title: AuthString.resetPassword, icon: Icons.login),
               ],
             ),

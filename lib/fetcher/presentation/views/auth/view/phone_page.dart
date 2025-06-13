@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_chat/core/config/config_app.dart';
+import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/input_phone.dart';
-
-import '../../../../../core/theme/color_theme_app.dart';
 
 import '../widget/app_bar_auth.dart';
 import '../widget/button_auth.dart';
@@ -16,27 +16,30 @@ class PhonePage extends StatefulWidget {
 class _PhonePageState extends State<PhonePage> {
   @override
   Widget build(BuildContext context) {
+    ConfigApp.initConfig(context);
+    double height = ConfigApp.height;
+    double width = ConfigApp.width;
     return SafeArea(
       child: Scaffold(
         appBar: AppBarAuth(title: 'Phone'),
-        backgroundColor: ColorThemeApp.backgroundColor,
+        backgroundColor: Theme.of(context).primaryColor,
         extendBodyBehindAppBar: true,
         body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8),
+          padding: AppSpacing.horizontalS,
           child: SingleChildScrollView(
             child: Column(
               children: [
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 Image.asset(
                   'assets/images/smartphone.png',
                   gaplessPlayback: true,
-                  width: MediaQuery.of(context).size.width * 0.5,
-                  height: MediaQuery.of(context).size.width * 0.5,
+                  width: width * 0.3,
+                  height: height * 0.3,
                   fit: BoxFit.cover,
                 ),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 InputPhone(),
-                SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                SizedBox(height: height * 0.1),
                 ButtonAuth(title: 'Send', icon: Icons.phone_callback),
               ],
             ),

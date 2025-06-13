@@ -20,6 +20,7 @@ class ThemesApp {
       style: ElevatedButton.styleFrom(
         backgroundColor: ColorThemeApp.darkColorScheme.primary,
         foregroundColor: ColorThemeApp.darkColorScheme.onPrimary,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       ),
     ),
 
@@ -41,10 +42,19 @@ class ThemesApp {
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(
       style: ElevatedButton.styleFrom(
-        backgroundColor: ColorThemeApp.lightColorScheme.primary,
-        foregroundColor: ColorThemeApp.lightColorScheme.onPrimary,
+        backgroundColor: ColorThemeApp.lightColorScheme.secondary,
+        side: BorderSide(
+          color: ColorThemeApp.lightColorScheme.primary,
+          width: 2,
+        ),
+        foregroundColor: ColorThemeApp.lightColorScheme.onSecondary,
+        elevation: 4,
+
+        padding: EdgeInsets.all(10),
+        iconColor: ColorThemeApp.tertiaryColor,
       ),
     ),
+    iconTheme: IconThemeData(color: ColorThemeApp.secondaryColor, size: 30),
 
     textTheme: ThemeText.getTextTheme(ColorThemeApp.lightColorScheme),
   );
@@ -65,6 +75,7 @@ class ThemesApp {
       style: ElevatedButton.styleFrom(
         backgroundColor: ColorThemeApp.collection1ColorScheme.primary,
         foregroundColor: ColorThemeApp.collection1ColorScheme.onPrimary,
+        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       ),
     ),
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:my_chat/core/config/config_app.dart';
+import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -56,6 +58,10 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   @override
   Widget build(BuildContext context) {
+    ConfigApp.initConfig(context);
+    double height = ConfigApp.height;
+    double width = ConfigApp.width;
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.black54,
@@ -67,8 +73,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                 return AlignTransition(
                   alignment: alignment,
                   child: Container(
-                    height: MediaQuery.of(context).size.height * 0.5,
-                    width: MediaQuery.of(context).size.width * 0.5,
+                    height: height * 0.5,
+                    width: width * 0.5,
                     decoration: const BoxDecoration(
                       image: DecorationImage(
                         image: AssetImage('assets/images/slack.png'),
@@ -83,16 +89,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.1),
+                  SizedBox(height: height * 0.1),
                   Text(
                     'Welcome to My Chat',
-                    style: GoogleFonts.praise(
-                      color: Colors.white,
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
+                    style: Theme.of(context).textTheme.displayLarge!.copyWith(
+                      fontFamily: GoogleFonts.praise().fontFamily,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                  AppSpacing.vSpaceXXL,
                   AnimatedBuilder(
                     animation: _controller,
                     builder: (BuildContext context, Widget? child) {
@@ -105,19 +111,19 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               icon: FontAwesomeIcons.rightToBracket,
                               onPressed: () {},
                             ),
-                            const SizedBox(height: 10),
+                            AppSpacing.vSpaceM,
                             ButtonAuth(
                               title: 'Register',
                               icon: FontAwesomeIcons.userAstronaut,
                               onPressed: () {},
                             ),
-                            const SizedBox(height: 10),
+                            AppSpacing.vSpaceM,
                             ButtonAuth(
                               title: 'Google',
                               icon: FontAwesomeIcons.google,
                               onPressed: () {},
                             ),
-                            const SizedBox(height: 10),
+                            AppSpacing.vSpaceM,
                             ButtonAuth(
                               title: 'Phone',
                               icon: FontAwesomeIcons.phone,
@@ -127,7 +133,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                         ),
                       );
                     },
-                    child: const SizedBox(height: 20),
+                    child: const SizedBox(),
                   ),
                 ],
               ),

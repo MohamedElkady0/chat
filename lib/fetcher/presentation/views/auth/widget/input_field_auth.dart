@@ -63,12 +63,23 @@ class InputFieldAuth extends StatelessWidget {
       obscureText: obscureText,
       keyboardType: keyboardType,
       decoration: InputDecoration(
-        labelStyle: const TextStyle(color: Colors.grey),
-        labelText: title,
-        prefixIcon: IconButton(onPressed: onPressed, icon: Icon(icon)),
+        hintStyle: Theme.of(context).textTheme.bodyLarge,
+        hintText: title,
+        prefixIcon: IconButton(
+          onPressed: onPressed,
+          icon: Icon(
+            icon,
+            size: Theme.of(context).iconTheme.size,
+            color: Theme.of(context).iconTheme.color,
+          ),
+        ),
+
         border: const OutlineInputBorder(),
-        focusedBorder: const OutlineInputBorder(
-          borderSide: BorderSide(color: Colors.blue, width: 2.0),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(
+            color: Theme.of(context).colorScheme.onPrimary,
+            width: 2.0,
+          ),
         ),
       ),
     );

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:my_chat/core/config/config_app.dart';
+import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/data/pageview_data.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/background_page.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/blur_background.dart';
@@ -36,13 +38,16 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
 
   @override
   Widget build(BuildContext context) {
+    ConfigApp.initConfig(context);
+    double width = ConfigApp.width;
+
     return SafeArea(
       minimum: EdgeInsets.symmetric(vertical: 8),
       child: Scaffold(
         floatingActionButton:
             _currentIndex < pageViewData.length - 1
                 ? FloatingActionButton(
-                  backgroundColor: Colors.blueAccent,
+                  backgroundColor: Theme.of(context).colorScheme.secondary,
                   onPressed: () {
                     _controller.animateToPage(
                       _currentIndex + 1,
@@ -73,45 +78,39 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
                   crossAxisAlignment: CrossAxisAlignment.center,
 
                   children: [
-                    SizedBox(height: 20),
+                    SizedBox(height: AppSpacing.vSpaceXXS.height),
                     Image.asset(
                       pageViewData[index].image!,
                       fit: BoxFit.fill,
-                      width: MediaQuery.of(context).size.width * 0.5,
+                      width: width * 0.5,
                     ),
-                    Text(
-                      pageViewData[index].title!,
-                      maxLines: 2,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 24,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                    Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: AppSpacing.horizontalXS.horizontal,
+                      ),
+                      child: Text(
+                        pageViewData[index].title!,
+                        maxLines: 2,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.displayMedium!
+                            .copyWith(color: Colors.white54),
                       ),
                     ),
                     if (index == pageViewData.length - 1)
                       ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueAccent,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 32,
-                          ),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                        ),
+                        style: Theme.of(context).elevatedButtonTheme.style,
                         onPressed: () {},
-                        child: const Text(
+                        child: Text(
                           'Get Started',
-                          style: TextStyle(
-                            fontSize: 18,
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge!.copyWith(
+                            color: Colors.white,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
-                    SizedBox(height: 20),
+                    SizedBox(height: AppSpacing.vSpaceXXS.height),
                   ],
                 ),
               ],
