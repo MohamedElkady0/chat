@@ -2,6 +2,21 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to location when open.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>هذا التطبيق يحتاج للوصول إلى موقعك دائمًا حتى في الخلفية.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>هذا التطبيق يحتاج للوصول إلى موقعك دائمًا حتى في الخلفية.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+    <key>YourPurposeKey</key>
+  	<string>هذا الوصف يشرح لماذا نحتاج لدقة الموقع الكاملة مؤقتًا.</string>
+
+
+
+
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

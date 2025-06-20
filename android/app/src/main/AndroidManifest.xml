@@ -1,4 +1,13 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.example.my_chat">   <!-- خطأ 1: تمت إضافة سمة "package" الإلزامية -->
+
+    <!-- ملاحظة: إذن ACCESS_FINE_LOCATION يتضمن ACCESS_COARSE_LOCATION، لذلك يمكن حذف الثاني -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <!-- خطأ 2: تم إغلاق الوسم بشكل صحيح بـ "/>" -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+
     <application
         android:label="my_chat"
         android:name="${applicationName}"
@@ -31,6 +40,7 @@
             android:name="flutterEmbedding"
             android:value="2" />
     </application>
+
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and
          https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
@@ -42,4 +52,5 @@
             <data android:mimeType="text/plain"/>
         </intent>
     </queries>
+
 </manifest>

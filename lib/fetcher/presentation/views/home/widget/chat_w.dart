@@ -1,144 +1,70 @@
 import 'package:flutter/material.dart';
-import 'package:my_chat/core/theme/save_theme.dart';
-import 'package:provider/provider.dart';
+import 'package:my_chat/core/config/config_app.dart';
+import 'package:my_chat/fetcher/presentation/views/home/widget/knowing_friend.dart';
 
-class ChatW extends StatefulWidget {
+class ChatW extends StatelessWidget {
   const ChatW({super.key});
 
   @override
-  State<ChatW> createState() => _ChatWState();
-}
-
-class _ChatWState extends State<ChatW> with SingleTickerProviderStateMixin {
-  // late TabController controller;
-  // @override
-  // void initState() {
-  //   controller = TabController(length: 4, vsync: this);
-
-  //   super.initState();
-  // }
-
-  // @override
-  // void dispose() {
-  //   controller.dispose();
-  //   super.dispose();
-  // }
-
-  @override
   Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-    final isDark = themeProvider.isDarkMode(context);
-    return DefaultTabController(
-      length: 4,
-      child: NestedScrollView(
-        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              // title: Text(
-              //   'الدردشة',
-              //   style: Theme.of(context).textTheme.displayLarge,
-              // ),
-              expandedHeight: 200,
-              bottom: TabBar(
-                // controller: controller,
-                labelStyle: Theme.of(context).textTheme.titleMedium!.copyWith(
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-                tabs: [
-                  Tab(
-                    text: 'الدردشات',
-                    icon: Icon(
-                      Icons.chat,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                  Tab(
-                    text: 'المجموعات',
-                    icon: Icon(
-                      Icons.group,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                  Tab(
-                    text: 'القنوات',
-                    icon: Icon(
-                      Icons.broadcast_on_home,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                  Tab(
-                    text: 'القنوات',
-                    icon: Icon(
-                      Icons.broadcast_on_home,
-                      color: Theme.of(context).colorScheme.onPrimary,
-                    ),
-                  ),
-                ],
+    ConfigApp.initConfig(context);
+    double w = ConfigApp.width;
+    double h = ConfigApp.height;
+    return Stack(
+      children: [
+        MapScreen(),
+        Container(
+          height: h,
+          width: w,
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.tertiary.withAlpha(30),
+          ),
+        ),
+        Positioned(
+          bottom: w * 0.1,
+          left: w * 0.05,
+          right: w * 0.05,
+          child: ElevatedButton.icon(
+            style: Theme.of(context).elevatedButtonTheme.style?.copyWith(
+              backgroundColor: MaterialStateProperty.all(
+                Theme.of(context).colorScheme.tertiary.withAlpha(100),
               ),
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                background: Image.asset(
-                  'assets/images/telegram.png',
-                  fit: BoxFit.cover,
-                ),
-                collapseMode: CollapseMode.pin,
-                // title: Text(
-                //   'الدردشة',
-                //   style: Theme.of(
-                //     context,
-                //   ).textTheme.headlineMedium!.copyWith(color: Colors.white),
-                // ),
-                // centerTitle: true,
+              foregroundColor: MaterialStateProperty.all(
+                Theme.of(context).colorScheme.onTertiary,
               ),
-
-              floating: true,
-              snap: true,
-              actions: [
-                IconButton(icon: Icon(Icons.search), onPressed: () {}),
-                IconButton(icon: Icon(Icons.settings), onPressed: () {}),
-                Switch(
-                  value: isDark,
-                  onChanged: (value) {
-                    themeProvider.toggleTheme(value);
-                  },
+            ),
+            onPressed: () {},
+            icon: const Icon(Icons.airplanemode_on),
+            label: const Text('رحله جديدة'),
+          ),
+        ),
+        Positioned(
+          left: w * 0.05,
+          top: w * 0.1,
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.tertiary.withAlpha(150),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
+                IconButton(onPressed: () {}, icon: const Icon(Icons.groups)),
+                IconButton(onPressed: () {}, icon: const Icon(Icons.chat)),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.web_stories),
+                ),
+                IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.event_note),
                 ),
               ],
             ),
-            // SliverList(
-            //   delegate: SliverChildBuilderDelegate((context, index) {
-            //     return ListTile(
-            //       leading: CircleAvatar(child: Text('U$index')),
-            //       title: Text('User $index'),
-            //       subtitle: Text('Last message from User $index'),
-            //     );
-            //   }, childCount: 20),
-            // ),
-          ];
-        },
-        body: TabBarView(
-          // controller: controller,
-          children: [
-            chatWidget(),
-            Center(child: Text('Groups Content')),
-            Center(child: Text('Channels Content')),
-            Center(child: Text('Channels Content')),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  ListView chatWidget() {
-    return ListView.builder(
-      itemCount: 20, // childCount becomes itemCount
-      itemBuilder: (context, index) {
-        // delegate becomes itemBuilder
-        return ListTile(
-          leading: CircleAvatar(child: Text('U$index')),
-          title: Text('User $index'),
-          subtitle: Text('Last message from User $index'),
-        );
-      },
+      ],
     );
   }
 }
