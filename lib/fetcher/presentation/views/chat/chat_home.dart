@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_chat/core/config/config_app.dart';
-import 'package:my_chat/fetcher/presentation/views/home/widget/knowing_friend.dart';
+import 'package:my_chat/core/function/show_menu_item.dart';
+import 'package:my_chat/fetcher/presentation/views/chat/widget/knowing_friend.dart';
 
 class ChatW extends StatelessWidget {
   const ChatW({super.key});
@@ -49,7 +50,12 @@ class ChatW extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                IconButton(onPressed: () {}, icon: const Icon(Icons.menu)),
+                IconButton(
+                  onPressed: () {
+                    menuChat(context);
+                  },
+                  icon: const Icon(Icons.menu),
+                ),
                 IconButton(onPressed: () {}, icon: const Icon(Icons.groups)),
                 IconButton(onPressed: () {}, icon: const Icon(Icons.chat)),
                 IconButton(

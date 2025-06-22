@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:my_chat/core/config/config_app.dart';
-import 'package:my_chat/fetcher/presentation/views/home/widget/chat_w.dart';
-import 'package:my_chat/fetcher/presentation/views/home/widget/enjoyment.dart';
-import 'package:my_chat/fetcher/presentation/views/home/widget/news.dart';
-import 'package:my_chat/fetcher/presentation/views/home/widget/shop.dart';
+import 'package:my_chat/fetcher/presentation/views/chat/chat_home.dart';
+import 'package:my_chat/fetcher/presentation/views/enjoyment/enjoyment.dart';
+import 'package:my_chat/fetcher/presentation/views/news/news.dart';
+import 'package:my_chat/fetcher/presentation/views/stories/shop.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
