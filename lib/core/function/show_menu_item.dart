@@ -2,54 +2,25 @@ import 'package:flutter/material.dart';
 
 Future<dynamic> menuChat(
   BuildContext context, {
-  String? title,
-  void Function()? onPressed,
+  required int index,
+  List<String>? title,
+  List<void Function()>? onPressed,
 }) {
   return showMenu(
     useRootNavigator: true,
     color: Theme.of(context).colorScheme.tertiary,
     context: context,
     items: [
-      popMenu(
-        context,
-        title: title ?? 'الحساب',
-
-        onPressed:
-            onPressed ??
-            () {
-              // Navigate to accounts
-            },
-      ),
-      popMenu(
-        context,
-        title: title ?? 'الاعدادات',
-
-        onPressed:
-            onPressed ??
-            () {
-              // Navigate to accounts
-            },
-      ),
-      popMenu(
-        context,
-        title: title ?? 'المساعدة',
-
-        onPressed:
-            onPressed ??
-            () {
-              // Navigate to accounts
-            },
-      ),
-      popMenu(
-        context,
-        title: title ?? 'تسجيل الخروج',
-
-        onPressed:
-            onPressed ??
-            () {
-              // Navigate to accounts
-            },
-      ),
+      for (int i = 0; i < index; i++)
+        popMenu(
+          context,
+          title: title?[i] ?? 'العنصر $i',
+          onPressed:
+              onPressed?[i] ??
+              () {
+                // Navigate to item $i
+              },
+        ),
     ],
     position: RelativeRect.fromLTRB(0, 0, 0, 0),
   );

@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:my_chat/core/config/config_app.dart';
-import 'package:my_chat/core/function/show_menu_item.dart';
 import 'package:my_chat/fetcher/presentation/views/chat/widget/knowing_friend.dart';
+import 'package:my_chat/fetcher/presentation/views/chat/widget/search_app.dart';
+import 'package:my_chat/fetcher/presentation/views/chat/widget/side_bar_chat.dart';
 
-class ChatW extends StatelessWidget {
+class ChatW extends StatefulWidget {
   const ChatW({super.key});
 
+  @override
+  State<ChatW> createState() => _ChatWState();
+}
+
+class _ChatWState extends State<ChatW> {
   @override
   Widget build(BuildContext context) {
     ConfigApp.initConfig(context);
@@ -21,6 +27,13 @@ class ChatW extends StatelessWidget {
             color: Theme.of(context).colorScheme.tertiary.withAlpha(30),
           ),
         ),
+        Positioned(
+          top: w * 0.1,
+          left: w * 0.05 + 60,
+          right: w * 0.05,
+          child: SearchApp(),
+        ),
+
         Positioned(
           bottom: w * 0.1,
           left: w * 0.05,
@@ -39,37 +52,7 @@ class ChatW extends StatelessWidget {
             label: const Text('رحله جديدة'),
           ),
         ),
-        Positioned(
-          left: w * 0.05,
-          top: w * 0.1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.tertiary.withAlpha(150),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                IconButton(
-                  onPressed: () {
-                    menuChat(context);
-                  },
-                  icon: const Icon(Icons.menu),
-                ),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.groups)),
-                IconButton(onPressed: () {}, icon: const Icon(Icons.chat)),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.web_stories),
-                ),
-                IconButton(
-                  onPressed: () {},
-                  icon: const Icon(Icons.event_note),
-                ),
-              ],
-            ),
-          ),
-        ),
+        Positioned(left: w * 0.05, top: w * 0.1, child: SideBarChat()),
       ],
     );
   }

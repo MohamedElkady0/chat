@@ -1,10 +1,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.my_chat">   <!-- خطأ 1: تمت إضافة سمة "package" الإلزامية -->
+    package="com.example.my_chat"> 
 
-    <!-- ملاحظة: إذن ACCESS_FINE_LOCATION يتضمن ACCESS_COARSE_LOCATION، لذلك يمكن حذف الثاني -->
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <!-- خطأ 2: تم إغلاق الوسم بشكل صحيح بـ "/>" -->
+
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
 
 

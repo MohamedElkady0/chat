@@ -12,49 +12,85 @@ class MapScreen extends StatefulWidget {
 }
 
 class _MapScreenState extends State<MapScreen> {
-  // 1. تعريف متغيرات الحالة
-  LatLng? _currentPosition; // لتخزين موقع المستخدم الحالي
-  String _currentAddress = 'لم يتم تحديد العنوان بعد'; // لتخزين العنوان النصي
-  final MapController _mapController = MapController(); // للتحكم بالخريطة
+  LatLng? _currentPosition;
+  String _currentAddress = 'لم يتم تحديد العنوان بعد';
+  final MapController _mapController = MapController();
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _getCurrentLocation(); // جلب الموقع عند بدء تشغيل الشاشة
+    _getCurrentLocation();
   }
 
   Future<void> _getCurrentLocation() async {
-    // ... (كل الكود السابق يبقى كما هو حتى تصل إلى setState)
+    bool serviceEnabled;
+    LocationPermission permission;
 
-    // الحصول على الموقع باستخدام geolocator
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      if (!mounted) return;
+      setState(() {
+        _currentAddress = 'خدمات الموقع معطلة. يرجى تفعيلها.';
+        _isLoading = false;
+      });
+      return;
+    }
 
-    // تحويل كائن Position إلى LatLng
-    final newPosition = LatLng(position.latitude, position.longitude);
-
-    // تحديث الحالة أولاً لإعادة بناء الواجهة مع الموقع الجديد
-    setState(() {
-      _currentPosition = newPosition;
-      _isLoading = false;
-    });
-
-    // *** التعديل هنا ***
-    // انتظر حتى يتم رسم الإطار، ثم حرك الخريطة
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && _currentPosition != null) {
-        _mapController.move(_currentPosition!, 4.0);
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+        setState(() {
+          _currentAddress = 'تم رفض إذن الوصول للموقع.';
+          _isLoading = false;
+        });
+        return;
       }
-    });
+    }
 
-    print("Current Position: $_currentPosition");
-    // جلب العنوان
-    _getAddressFromLatLng(position);
+    if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return;
+      setState(() {
+        _currentAddress =
+            'تم رفض إذن الوصول للموقع بشكل دائم. يرجى تفعيله من إعدادات التطبيق.';
+        _isLoading = false;
+      });
+      return;
+    }
+
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      if (!mounted) return;
+
+      final newPosition = LatLng(position.latitude, position.longitude);
+
+      setState(() {
+        _currentPosition = newPosition;
+        _isLoading = false;
+      });
+
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _currentPosition != null) {
+          _mapController.move(_currentPosition!, 2.0);
+        }
+      });
+
+      _getAddressFromLatLng(position);
+    } catch (e) {
+      debugPrint("Error getting location: $e");
+      if (!mounted) return;
+      setState(() {
+        _currentAddress = "خطأ في تحديد الموقع: ${e.toString()}";
+        _isLoading = false;
+      });
+    }
   }
 
-  // 3. دالة لتحويل الإحداثيات إلى عنوان باستخدام geocoding
   Future<void> _getAddressFromLatLng(Position position) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -62,15 +98,18 @@ class _MapScreenState extends State<MapScreen> {
         position.longitude,
       );
 
+      if (!mounted) return;
+
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
         setState(() {
           _currentAddress =
-              "${place.street}, ${place.locality}, ${place.country}";
+              " ${place.country}"; // {place.street}, {place.locality},
         });
       }
     } catch (e) {
       debugPrint(e.toString());
+      if (!mounted) return;
       setState(() {
         _currentAddress = "لا يمكن جلب العنوان";
       });
@@ -87,35 +126,51 @@ class _MapScreenState extends State<MapScreen> {
   Widget build(BuildContext context) {
     return _isLoading
         ? const Center(child: CircularProgressIndicator())
-        : FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            initialCenter:
-                _currentPosition ?? const LatLng(51.5, -0.09), // موقع افتراضي
-            initialZoom: 4.0,
-          ),
+        : Stack(
           children: [
-            // طبقة الخريطة الأساسية
-            TileLayer(
-              urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-              userAgentPackageName: 'com.example.my_chat',
-            ),
-            // طبقة العلامات (Markers)
-            if (_currentPosition != null)
-              MarkerLayer(
-                markers: [
-                  Marker(
-                    width: 80.0,
-                    height: 80.0,
-                    point: _currentPosition!,
-                    child: const Icon(
-                      Icons.location_pin,
-                      color: Colors.red,
-                      size: 40.0,
-                    ),
-                  ),
-                ],
+            FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                initialCenter: _currentPosition ?? const LatLng(51.5, -0.09),
+                initialZoom: 2.0,
               ),
+              children: [
+                TileLayer(
+                  urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                  userAgentPackageName: 'com.example.my_chat',
+                ),
+                if (_currentPosition != null)
+                  MarkerLayer(
+                    markers: [
+                      Marker(
+                        width: 80.0,
+                        height: 80.0,
+                        point: _currentPosition!,
+                        child: const Icon(
+                          Icons.location_pin,
+                          color: Colors.red,
+                          size: 40.0,
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+
+            Positioned(
+              bottom: 80,
+              left: MediaQuery.of(context).size.width * 0.3,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _currentAddress,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+              ),
+            ),
           ],
         );
   }
