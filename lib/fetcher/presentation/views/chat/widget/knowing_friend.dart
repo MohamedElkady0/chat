@@ -146,10 +146,13 @@ class _MapScreenState extends State<MapScreen> {
                         width: 80.0,
                         height: 80.0,
                         point: _currentPosition!,
-                        child: const Icon(
-                          Icons.location_pin,
-                          color: Colors.red,
-                          size: 40.0,
+                        child: CircleAvatar(
+                          radius: 30,
+                          backgroundColor: Colors.blue,
+                          child: Image.network(
+                            'https://cdn-icons-png.flaticon.com/128/181/181497.png',
+                            fit: BoxFit.fill,
+                          ),
                         ),
                       ),
                     ],
@@ -159,7 +162,7 @@ class _MapScreenState extends State<MapScreen> {
 
             Positioned(
               bottom: 80,
-              left: MediaQuery.of(context).size.width * 0.3,
+              left: MediaQuery.of(context).size.width * 0.27,
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(8.0),

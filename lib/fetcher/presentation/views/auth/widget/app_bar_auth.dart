@@ -14,7 +14,8 @@ class AppBarAuth extends StatelessWidget implements PreferredSizeWidget {
       actions: [Image.asset('assets/images/slack.png')],
 
       centerTitle: true,
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).colorScheme.onTertiary,
+      foregroundColor: Theme.of(context).colorScheme.tertiary,
     );
   }
 

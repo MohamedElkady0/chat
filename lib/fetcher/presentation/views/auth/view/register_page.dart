@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/image_auth.dart';
+import 'package:my_chat/fetcher/presentation/views/splach/splash_view_2.dart';
 
 import '../widget/app_bar_auth.dart';
 import '../widget/button_auth.dart';
@@ -40,7 +41,7 @@ class _RegisterPageState extends State<RegisterPage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBarAuth(title: 'Register'),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.tertiary,
         extendBodyBehindAppBar: true,
         body: Padding(
           padding: AppSpacing.horizontalS,
@@ -93,7 +94,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 SizedBox(height: height * 0.02),
 
                 SizedBox(height: height * 0.05),
-                ButtonAuth(title: 'Register', icon: Icons.person_add),
+                ButtonAuth(
+                  title: 'Register',
+                  icon: Icons.person_add,
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => SplashView2()),
+                    );
+                  },
+                ),
               ],
             ),
           ),

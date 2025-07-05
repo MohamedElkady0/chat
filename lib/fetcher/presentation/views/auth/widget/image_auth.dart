@@ -16,21 +16,21 @@ class ImageAuth extends StatelessWidget {
           onTap: () {},
           child: CircleAvatar(
             radius: width * 0.13,
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            backgroundColor: Theme.of(context).colorScheme.onTertiary,
             child: Icon(
               FontAwesomeIcons.user,
               size: width * 0.10,
-              color: Colors.white,
+              color: Theme.of(context).colorScheme.tertiary,
             ),
           ),
         ),
         Positioned(
-          bottom: 0,
-          right: -10,
+          bottom: -2,
+          right: 0,
           child: IconButton(
             icon: Icon(
               FontAwesomeIcons.camera,
-              color: Theme.of(context).colorScheme.onPrimary,
+              color: Theme.of(context).colorScheme.tertiary,
             ),
             onPressed: () {
               // Implement image picker functionality here

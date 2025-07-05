@@ -11,6 +11,10 @@ class PopChats extends StatelessWidget {
     this.dates,
     this.onTap,
     required this.isMenu,
+    this.icon,
+    this.color,
+    this.offset,
+    this.onSelected,
   });
 
   final int index;
@@ -20,6 +24,10 @@ class PopChats extends StatelessWidget {
   final List<String>? dates;
   final bool isMenu;
   final List<void Function()>? onTap;
+  final Widget? icon;
+  final Color? color;
+  final Offset? offset;
+  final List<void Function(dynamic)>? onSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -45,15 +53,19 @@ class PopChats extends StatelessWidget {
                 ),
         ];
       },
-      onSelected: (value) {
-        print('Selected: $value');
-      },
-      color: Theme.of(context).colorScheme.tertiary,
-      offset: isMenu ? const Offset(50, 0) : const Offset(50, -97),
+      onSelected:
+          onSelected != null
+              ? (value) {
+                for (var callback in onSelected!) {
+                  callback(value);
+                }
+              }
+              : null,
+      color: color ?? Theme.of(context).colorScheme.onTertiaryContainer,
+      offset: offset ?? Offset(0, 0),
       icon:
-          isMenu
-              ? const Icon(Icons.menu)
-              : const Icon(Icons.chat_bubble_outline),
+          icon ??
+          Icon(Icons.more_vert, color: Theme.of(context).colorScheme.primary),
     );
   }
 }

@@ -88,10 +88,10 @@ class _InputPhoneState extends State<InputPhone> {
     double height = ConfigApp.height;
     return Container(
       padding: AppSpacing.horizontalM,
-      height: height * .09,
+      height: height * .1,
       decoration: BoxDecoration(
         borderRadius: AppSpacing.radiusM,
-        color: Theme.of(context).colorScheme.secondary,
+        color: Theme.of(context).colorScheme.tertiary,
         border: Border.all(color: Colors.white, width: 2),
       ),
       child: InternationalPhoneNumberInput(

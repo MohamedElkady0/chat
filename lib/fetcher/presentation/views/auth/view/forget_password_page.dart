@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/utils/auth_string.dart';
+import 'package:my_chat/fetcher/presentation/views/splach/splash_view_2.dart';
 
 import '../widget/app_bar_auth.dart';
 import '../widget/button_auth.dart';
@@ -30,7 +31,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBarAuth(title: 'Password Recovery'),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.tertiary,
         extendBodyBehindAppBar: true,
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
@@ -51,7 +52,15 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                 ),
 
                 SizedBox(height: height * 0.1),
-                ButtonAuth(title: AuthString.resetPassword, icon: Icons.login),
+                ButtonAuth(
+                  title: AuthString.resetPassword,
+                  icon: Icons.login,
+                  onPressed: () {
+                    Navigator.of(context).pushReplacement(
+                      MaterialPageRoute(builder: (context) => SplashView2()),
+                    );
+                  },
+                ),
               ],
             ),
           ),

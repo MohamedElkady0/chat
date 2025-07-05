@@ -15,6 +15,7 @@ class SideBarChat extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           PopChats(
+            offset: const Offset(50, 0),
             index: 4,
             title: ['الحساب', 'الاعدادات', 'المساعدة', 'تسجيل الخروج'],
             isMenu: true,
@@ -22,6 +23,8 @@ class SideBarChat extends StatelessWidget {
           ),
           IconButton(onPressed: () {}, icon: const Icon(Icons.groups)),
           PopChats(
+            icon: const Icon(Icons.chat_bubble_outline),
+            offset: const Offset(50, -97),
             isMenu: false,
             index: 16,
             title: [

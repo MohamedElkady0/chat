@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:my_chat/core/theme/save_theme.dart';
 import 'package:my_chat/core/theme/themes_app.dart';
-
-import 'package:my_chat/fetcher/presentation/views/home/home.dart';
+import 'package:my_chat/fetcher/presentation/views/Introduction/page_view.dart';
 
 import 'package:provider/provider.dart';
 
@@ -33,7 +32,7 @@ class ChatMy extends StatelessWidget {
           theme: ThemesApp.light,
           darkTheme: ThemesApp.dark,
           themeMode: themeProvider.themeMode,
-          home: HomePage(),
+          home: PageViewMyChat(),
         );
       },
     );

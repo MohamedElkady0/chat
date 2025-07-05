@@ -10,12 +10,13 @@ PopupMenuItem<dynamic> popMenu(
   void Function()? onTap,
 }) {
   return PopupMenuItem(
+    padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 12),
     onTap: onTap,
     child:
         isMenu
             ? Text(
               title!,
-              style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
+              style: TextStyle(color: Theme.of(context).colorScheme.tertiary),
             )
             : SizedBox(
               width: MediaQuery.of(context).size.width * 0.55,

@@ -9,7 +9,7 @@ class TextAuth extends StatelessWidget {
     return Text(
       data,
       style: GoogleFonts.pragatiNarrow(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.tertiary,
         fontSize: 30,
         fontWeight: FontWeight.bold,
       ),

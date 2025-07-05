@@ -12,6 +12,8 @@ analyzer:
     deprecated_member_use: false
     avoid_print: false
     unused_field: false
+    library_private_types_in_public_api: false
+    must_be_immutable: false
 
 include: package:flutter_lints/flutter.yaml
 

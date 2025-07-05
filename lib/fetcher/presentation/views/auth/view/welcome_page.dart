@@ -3,7 +3,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/login_page.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/phone_page.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/register_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
+import 'package:my_chat/fetcher/presentation/views/splach/splash_view_2.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -109,25 +113,49 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             ButtonAuth(
                               title: 'Login',
                               icon: FontAwesomeIcons.rightToBracket,
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => LoginPage(),
+                                  ),
+                                );
+                              },
                             ),
                             AppSpacing.vSpaceM,
                             ButtonAuth(
                               title: 'Register',
                               icon: FontAwesomeIcons.userAstronaut,
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => RegisterPage(),
+                                  ),
+                                );
+                              },
                             ),
                             AppSpacing.vSpaceM,
                             ButtonAuth(
                               title: 'Google',
                               icon: FontAwesomeIcons.google,
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).pushReplacement(
+                                  MaterialPageRoute(
+                                    builder: (context) => SplashView2(),
+                                  ),
+                                );
+                              },
                             ),
                             AppSpacing.vSpaceM,
                             ButtonAuth(
                               title: 'Phone',
                               icon: FontAwesomeIcons.phone,
-                              onPressed: () {},
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => PhonePage(),
+                                  ),
+                                );
+                              },
                             ),
                           ],
                         ),

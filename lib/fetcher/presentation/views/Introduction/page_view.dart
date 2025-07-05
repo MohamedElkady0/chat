@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/data/pageview_data.dart';
+import 'package:my_chat/fetcher/presentation/views/Introduction/widget/anim_image.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/background_page.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/blur_background.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/welcome_page.dart';
 
 class PageViewMyChat extends StatefulWidget {
   const PageViewMyChat({super.key});
@@ -12,9 +14,12 @@ class PageViewMyChat extends StatefulWidget {
   State<PageViewMyChat> createState() => _PageViewMyChatState();
 }
 
-class _PageViewMyChatState extends State<PageViewMyChat> {
+class _PageViewMyChatState extends State<PageViewMyChat>
+    with SingleTickerProviderStateMixin {
   final PageController _controller = PageController(initialPage: 0);
+
   int _currentIndex = 0;
+  late AnimationController animationController;
 
   @override
   void initState() {
@@ -28,19 +33,24 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
     //     curve: Curves.easeIn,
     //   );
     // });
+
+    animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    );
+    animationController.repeat(reverse: true);
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    animationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     ConfigApp.initConfig(context);
-    double width = ConfigApp.width;
-
     return SafeArea(
       minimum: EdgeInsets.symmetric(vertical: 8),
       child: Scaffold(
@@ -66,6 +76,10 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
             setState(() {
               _currentIndex = index;
             });
+
+            animationController.reset();
+
+            animationController.repeat(reverse: true);
           },
           itemCount: pageViewData.length,
           itemBuilder: (context, index) {
@@ -79,10 +93,9 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
 
                   children: [
                     SizedBox(height: AppSpacing.vSpaceXXS.height),
-                    Image.asset(
-                      pageViewData[index].image!,
-                      fit: BoxFit.fill,
-                      width: width * 0.5,
+                    AnimImagePageView(
+                      index: index,
+                      animationController: animationController,
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(
@@ -99,7 +112,13 @@ class _PageViewMyChatState extends State<PageViewMyChat> {
                     if (index == pageViewData.length - 1)
                       ElevatedButton(
                         style: Theme.of(context).elevatedButtonTheme.style,
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pushReplacement(
+                            MaterialPageRoute(
+                              builder: (context) => WelcomeScreen(),
+                            ),
+                          );
+                        },
                         child: Text(
                           'Get Started',
                           style: Theme.of(
