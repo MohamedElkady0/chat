@@ -64,7 +64,7 @@ class InputFieldAuth extends StatelessWidget {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintStyle: Theme.of(context).textTheme.bodyLarge!.copyWith(
-          color: Theme.of(context).colorScheme.onTertiary,
+          color: Theme.of(context).colorScheme.onPrimary,
         ),
         hintText: title,
         prefixIcon: IconButton(
@@ -79,7 +79,7 @@ class InputFieldAuth extends StatelessWidget {
         border: const OutlineInputBorder(),
         focusedBorder: OutlineInputBorder(
           borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.onPrimary,
+            color: Theme.of(context).colorScheme.primaryContainer,
             width: 2.0,
           ),
         ),

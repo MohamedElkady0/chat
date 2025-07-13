@@ -65,7 +65,10 @@ class PopChats extends StatelessWidget {
       offset: offset ?? Offset(0, 0),
       icon:
           icon ??
-          Icon(Icons.more_vert, color: Theme.of(context).colorScheme.primary),
+          Icon(
+            Icons.more_vert,
+            color: color ?? Theme.of(context).colorScheme.onTertiaryContainer,
+          ),
     );
   }
 }

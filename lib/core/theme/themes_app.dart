@@ -58,27 +58,4 @@ class ThemesApp {
 
     textTheme: ThemeText.getTextTheme(ColorThemeApp.lightColorScheme),
   );
-
-  static ThemeData colorsCollection1 = ThemeData.dark().copyWith(
-    useMaterial3: true,
-    colorScheme: ColorThemeApp.collection1ColorScheme,
-    scaffoldBackgroundColor: ColorThemeApp.collection1ColorScheme.background,
-    appBarTheme: AppBarTheme(
-      backgroundColor: ColorThemeApp.collection1ColorScheme.primary,
-      foregroundColor: ColorThemeApp.collection1ColorScheme.onPrimary,
-    ),
-    cardTheme: CardTheme(
-      color: ColorThemeApp.collection1ColorScheme.surface,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    ),
-    elevatedButtonTheme: ElevatedButtonThemeData(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: ColorThemeApp.collection1ColorScheme.primary,
-        foregroundColor: ColorThemeApp.collection1ColorScheme.onPrimary,
-        padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      ),
-    ),
-
-    textTheme: ThemeText.getTextTheme(ColorThemeApp.collection1ColorScheme),
-  );
 }

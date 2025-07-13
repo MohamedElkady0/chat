@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
+import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/data/pageview_data.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/anim_image.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/background_page.dart';
 import 'package:my_chat/fetcher/presentation/views/Introduction/widget/blur_background.dart';
-import 'package:my_chat/fetcher/presentation/views/auth/view/welcome_page.dart';
 
 class PageViewMyChat extends StatefulWidget {
   const PageViewMyChat({super.key});
@@ -111,21 +113,30 @@ class _PageViewMyChatState extends State<PageViewMyChat>
                     ),
                     if (index == pageViewData.length - 1)
                       ElevatedButton(
-                        style: Theme.of(context).elevatedButtonTheme.style,
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => WelcomeScreen(),
+                        style: Theme.of(
+                          context,
+                        ).elevatedButtonTheme.style!.copyWith(
+                          padding: MaterialStateProperty.all(
+                            EdgeInsets.symmetric(
+                              horizontal: AppSpacing.horizontalS.horizontal,
+                              vertical: AppSpacing.verticalS.vertical,
                             ),
-                          );
-                        },
+                          ),
+                        ),
+                        onPressed:
+                            () =>
+                                BlocProvider.of<AuthCubit>(
+                                  context,
+                                ).onIntroEnd(),
                         child: Text(
                           'Get Started',
                           style: Theme.of(
                             context,
                           ).textTheme.bodyLarge!.copyWith(
+                            fontFamily: GoogleFonts.poppins().fontFamily,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                            fontSize: 22,
                           ),
                         ),
                       ),

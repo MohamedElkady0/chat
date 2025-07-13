@@ -1,29 +1,29 @@
 import 'package:my_chat/fetcher/data/model/user_message.dart';
 
 class UserInfoData {
-  final String userId;
-  final String name;
-  final String email;
-  final String phoneNumber;
-  final String image;
-  final List<String> friends;
-  final String userPlace;
-  final String userCity;
-  final String userCountry;
-  final String? password;
+  String? userId;
+  String? name;
+  String? email;
+  String? phoneNumber;
+  String? image;
+  List<String>? friends;
+  String? userPlace;
+  String? userCity;
+  String? userCountry;
+  String? password;
   UserMessage? userMessage;
 
   UserInfoData({
     this.userMessage,
-    required this.userId,
-    required this.name,
-    required this.email,
-    required this.phoneNumber,
-    required this.image,
-    required this.friends,
-    required this.userPlace,
-    required this.userCity,
-    required this.userCountry,
+    this.userId,
+    this.name,
+    this.email,
+    this.phoneNumber,
+    this.image,
+    this.friends,
+    this.userPlace,
+    this.userCity,
+    this.userCountry,
     this.password,
   });
   factory UserInfoData.fromJson(Map<String, dynamic> json) => UserInfoData(
@@ -32,12 +32,15 @@ class UserInfoData {
     email: json['email'],
     phoneNumber: json['phoneNumber'],
     image: json['image'],
-    friends: json['friends'],
+    friends: List<String>.from(json['friends'] ?? []),
     userPlace: json['userPlace'],
     userCity: json['userCity'],
     userCountry: json['userCountry'],
     password: json['password'],
-    userMessage: UserMessage.fromJson(json['userMessage']),
+    userMessage:
+        json['userMessage'] != null
+            ? UserMessage.fromJson(json['userMessage'])
+            : null,
   );
 
   Map<String, dynamic> toJson() => {
@@ -124,7 +127,7 @@ class UserInfoData {
       email = userInfoData.email,
       phoneNumber = userInfoData.phoneNumber,
       image = userInfoData.image,
-      friends = List<String>.from(userInfoData.friends),
+      friends = List<String>.from(userInfoData.friends ?? []),
       userPlace = userInfoData.userPlace,
       userCity = userInfoData.userCity,
       userCountry = userInfoData.userCountry,

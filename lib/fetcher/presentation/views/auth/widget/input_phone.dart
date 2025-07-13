@@ -1,86 +1,14 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
+import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
 
-class InputPhone extends StatefulWidget {
-  const InputPhone({super.key});
+class InputPhone extends StatelessWidget {
+  const InputPhone({super.key, required this.phoneController});
 
-  @override
-  State<InputPhone> createState() => _InputPhoneState();
-}
-
-class _InputPhoneState extends State<InputPhone> {
-  final TextEditingController _otpController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-
-  String initialCountry = 'EG';
-  PhoneNumber number = PhoneNumber(isoCode: 'EG');
-
-  String? _verificationId;
-
-  void sendOtp() async {
-    if (phoneController.text.trim().isEmpty) {
-      return;
-    }
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: phoneController.text,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        await FirebaseAuth.instance.signInWithCredential(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {},
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _verificationId = verificationId;
-        });
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        setState(() {
-          _verificationId = verificationId;
-        });
-      },
-    );
-  }
-
-  void verifyOtp() async {
-    final otp = _otpController.text.trim();
-    if (_verificationId == null) {
-      return;
-    }
-    if (otp.isEmpty) {
-      return;
-    }
-    final credential = PhoneAuthProvider.credential(
-      verificationId: _verificationId!,
-      smsCode: otp,
-    );
-    try {
-      await FirebaseAuth.instance.signInWithCredential(credential);
-    } catch (e) {
-      debugPrint('Error verifying OTP: $e');
-      // Handle error, e.g., show a snackbar or dialog
-    }
-  }
-
-  void getPhoneNumber(String phoneNumber) async {
-    PhoneNumber number = await PhoneNumber.getRegionInfoFromPhoneNumber(
-      phoneNumber,
-      'US',
-    );
-
-    setState(() {
-      this.number = number;
-    });
-  }
-
-  @override
-  void dispose() {
-    phoneController.dispose();
-    _otpController.dispose();
-    super.dispose();
-  }
+  final TextEditingController phoneController;
 
   @override
   Widget build(BuildContext context) {
@@ -91,13 +19,13 @@ class _InputPhoneState extends State<InputPhone> {
       height: height * .1,
       decoration: BoxDecoration(
         borderRadius: AppSpacing.radiusM,
-        color: Theme.of(context).colorScheme.tertiary,
+        color: Theme.of(context).colorScheme.primary,
         border: Border.all(color: Colors.white, width: 2),
       ),
       child: InternationalPhoneNumberInput(
         textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
         onInputChanged: (PhoneNumber number) {
-          this.number = number;
+          BlocProvider.of<AuthCubit>(context).number = number;
         },
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
@@ -113,7 +41,7 @@ class _InputPhoneState extends State<InputPhone> {
         ignoreBlank: false,
         autoValidateMode: AutovalidateMode.disabled,
         selectorTextStyle: const TextStyle(color: Colors.grey),
-        initialValue: number,
+        initialValue: BlocProvider.of<AuthCubit>(context).number,
         textFieldController: phoneController,
         formatInput: true,
         keyboardType: const TextInputType.numberWithOptions(
@@ -121,7 +49,9 @@ class _InputPhoneState extends State<InputPhone> {
           decimal: true,
         ),
         inputBorder: const OutlineInputBorder(),
-        onSaved: (PhoneNumber number) {},
+        onSaved: (PhoneNumber number) {
+          BlocProvider.of<AuthCubit>(context).number = number;
+        },
         inputDecoration: const InputDecoration(
           hintText: 'Enter Your Phone Number',
           hintStyle: TextStyle(color: Colors.grey),

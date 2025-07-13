@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_chat/core/config/config_app.dart';
+import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/view/welcome_page.dart';
 import 'package:my_chat/fetcher/presentation/views/chat/chat_home.dart';
 import 'package:my_chat/fetcher/presentation/views/enjoyment/enjoyment.dart';
 
@@ -23,46 +26,56 @@ class _HomePageState extends State<HomePage> {
     ConfigApp.initConfig(context);
     double w = ConfigApp.width;
 
-    return SafeArea(
-      child: Scaffold(
-        body: pages[_currentIndex],
-        bottomNavigationBar: BottomNavigationBar(
-          elevation: 0,
-          type: BottomNavigationBarType.shifting,
-          selectedIconTheme: Theme.of(context).iconTheme.copyWith(
-            color: Theme.of(context).colorScheme.onTertiary,
-            size: w * 0.08,
-          ),
-          selectedItemColor: Theme.of(context).colorScheme.onTertiary,
-          unselectedItemColor: Theme.of(context).colorScheme.primary,
+    return BlocListener<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthUnauthenticated) {
+          Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(builder: (context) => WelcomeScreen()),
+            (route) => false,
+          );
+        }
+      },
+      child: SafeArea(
+        child: Scaffold(
+          body: pages[_currentIndex],
+          bottomNavigationBar: BottomNavigationBar(
+            elevation: 0,
+            type: BottomNavigationBarType.shifting,
+            selectedIconTheme: Theme.of(context).iconTheme.copyWith(
+              color: Theme.of(context).colorScheme.onTertiary,
+              size: w * 0.08,
+            ),
+            selectedItemColor: Theme.of(context).colorScheme.onTertiary,
+            unselectedItemColor: Theme.of(context).colorScheme.primary,
 
-          unselectedIconTheme: Theme.of(context).iconTheme.copyWith(
-            color: Theme.of(context).colorScheme.primary,
-            size: w * 0.05,
-          ),
+            unselectedIconTheme: Theme.of(context).iconTheme.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              size: w * 0.05,
+            ),
 
-          onTap: (value) {
-            setState(() {
-              _currentIndex = value;
-            });
-          },
-          currentIndex: _currentIndex,
-          items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.chat),
-              label: 'الدردشات',
-              backgroundColor: Theme.of(context).colorScheme.tertiary,
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.shopping_cart),
-              label: 'المتجر',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.newspaper),
-              label: 'الأخبار',
-            ),
-            BottomNavigationBarItem(icon: Icon(Icons.star), label: 'ترفيه'),
-          ],
+            onTap: (value) {
+              setState(() {
+                _currentIndex = value;
+              });
+            },
+            currentIndex: _currentIndex,
+            items: [
+              BottomNavigationBarItem(
+                icon: Icon(Icons.chat),
+                label: 'الدردشات',
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.shopping_cart),
+                label: 'المتجر',
+              ),
+              BottomNavigationBarItem(
+                icon: Icon(Icons.newspaper),
+                label: 'الأخبار',
+              ),
+              BottomNavigationBarItem(icon: Icon(Icons.star), label: 'ترفيه'),
+            ],
+          ),
         ),
       ),
     );

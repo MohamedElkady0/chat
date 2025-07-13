@@ -3,15 +3,14 @@ import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:my_chat/fetcher/presentation/views/home/home.dart';
 
-class SplashView2 extends StatefulWidget {
-  const SplashView2({super.key});
+class SplashView extends StatefulWidget {
+  const SplashView({super.key});
 
   @override
-  State<SplashView2> createState() => _SplashView2State();
+  State<SplashView> createState() => _SplashViewState();
 }
 
-class _SplashView2State extends State<SplashView2>
-    with TickerProviderStateMixin {
+class _SplashViewState extends State<SplashView> with TickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late ConnectivityResult _connectivityResult;
@@ -35,30 +34,38 @@ class _SplashView2State extends State<SplashView2>
   }
 
   void _checkInternetConnection() async {
+    // انتظر نتيجة فحص الاتصال
     List<ConnectivityResult> connectivityResult =
         await Connectivity().checkConnectivity();
 
+    // !! -- الإضافة المهمة هنا -- !!
+    // قبل محاولة تحديث الحالة، تحقق مما إذا كانت الويدجت لا تزال موجودة
+    if (!mounted) return;
+
+    // الآن يمكنك استدعاء setState بأمان
     setState(() {
       _connectivityResult = connectivityResult[0];
     });
 
     if (_connectivityResult == ConnectivityResult.mobile ||
         _connectivityResult == ConnectivityResult.wifi) {
-      // الإنترنت شغال، انقل المستخدم إلى الصفحة التالية
+      // الإنترنت شغال، انقل المستخدم إلى الصفحة التالية بعد 6 ثوانٍ
       Future.delayed(const Duration(seconds: 6), () {
+        // لقد قمت بالفعل بإضافة التحقق هنا، وهذا ممتاز!
         if (!mounted) return;
-        if (!isFirstTime) {
-          setState(() {
-            isFirstTime = true; // تعيين متغير لمنع تكرار الأنيميشن
-          });
-          Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          ); // التنقل مرة واحدة فقط
-        }
+
+        // لا حاجة لاستخدام isFirstTime هنا لأن pushReplacement يضمن عدم العودة
+        // ويمكنك استدعاء Navigator مباشرة
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const HomePage()),
+        );
       });
     } else {
       // الإنترنت غير متصل، أظهر رسالة تحذير
-      _showNoInternetDialog();
+      // من الجيد أيضًا التحقق من mounted هنا قبل إظهار الحوار
+      if (mounted) {
+        _showNoInternetDialog();
+      }
     }
   }
 

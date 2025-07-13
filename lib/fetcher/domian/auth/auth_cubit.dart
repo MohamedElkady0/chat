@@ -1,52 +1,99 @@
-import 'package:bloc/bloc.dart';
-
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:my_chat/fetcher/data/model/user_info.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit() : super(AuthInitial());
+  late StreamSubscription _authSubscription;
+  final FirebaseAuth _credential = FirebaseAuth.instance;
 
   UserInfoData? _currentUserInfo;
 
   UserInfoData? get currentUserInfo => _currentUserInfo;
+  set currentUserInfo(UserInfoData? userInfo) {
+    _currentUserInfo = userInfo;
+    emit(AuthInitial());
+  }
 
   bool isRegister = true;
   File? img;
-  final String _otp = '';
+  String otp = '';
   String? _verificationId;
   PhoneNumber? number;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-  final FirebaseAuth _credential = FirebaseAuth.instance;
 
-  LatLng? _currentPosition;
-  String _currentAddress = 'لم يتم تحديد العنوان بعد';
-  MapController? _mapController;
-  bool _isLoading = true;
+  LatLng? currentPosition;
+  String currentAddress = 'لم يتم تحديد العنوان بعد';
+  MapController? mapController;
+  bool isLoading = true;
+  SharedPreferences? prefs;
 
-  // ignore: unused_element
-  Future<void> _getCurrentLocation() async {
+  AuthCubit() : super(AuthInitial());
+
+  Future<void> checkAppState() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool hasSeenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+
+    if (!hasSeenOnboarding) {
+      emit(ShowOnboardingState());
+    } else {
+      final user = _credential.currentUser;
+      if (user != null) {
+        emit(AuthAuthenticated());
+      } else {
+        emit(AuthUnauthenticated());
+      }
+    }
+  }
+
+  Future<void> onIntroEnd() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('seenOnboarding', true);
+
+    emit(AuthUnauthenticated());
+  }
+
+  void pickImage({required String title}) async {
+    final ImagePicker picker = ImagePicker();
+    XFile? pickedFile;
+    if (title == 'Gallery') {
+      pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    } else {
+      pickedFile = await picker.pickImage(source: ImageSource.camera);
+    }
+    if (pickedFile == null) {
+      return;
+    }
+
+    img = File(pickedFile.path);
+    emit(AuthImagePicked(img!));
+  }
+
+  Future<void> getCurrentLocation() async {
     bool serviceEnabled;
     LocationPermission permission;
 
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
-      _currentAddress = 'خدمات الموقع معطلة. يرجى تفعيلها.';
-      _isLoading = false;
+      currentAddress = 'خدمات الموقع معطلة. يرجى تفعيلها.';
+      isLoading = false;
 
       return;
     }
@@ -55,17 +102,17 @@ class AuthCubit extends Cubit<AuthState> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        _currentAddress = 'تم رفض إذن الوصول للموقع.';
-        _isLoading = false;
+        currentAddress = 'تم رفض إذن الوصول للموقع.';
+        isLoading = false;
 
         return;
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
-      _currentAddress =
+      currentAddress =
           'تم رفض إذن الوصول للموقع بشكل دائم. يرجى تفعيله من إعدادات التطبيق.';
-      _isLoading = false;
+      isLoading = false;
 
       return;
     }
@@ -77,26 +124,26 @@ class AuthCubit extends Cubit<AuthState> {
 
       final newPosition = LatLng(position.latitude, position.longitude);
 
-      _currentPosition = newPosition;
-      _isLoading = false;
+      currentPosition = newPosition;
+      isLoading = false;
 
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_currentPosition != null) {
-          _mapController?.move(_currentPosition!, 2.0);
+        if (currentPosition != null) {
+          mapController?.move(currentPosition!, 2.0);
         }
       });
 
-      _getAddressFromLatLng(position);
+      getAddressFromLatLng(position);
     } catch (e) {
       debugPrint("Error getting location: $e");
       // if (!mounted) return;
 
-      _currentAddress = "خطأ في تحديد الموقع: ${e.toString()}";
-      _isLoading = false;
+      currentAddress = "خطأ في تحديد الموقع: ${e.toString()}";
+      isLoading = false;
     }
   }
 
-  Future<void> _getAddressFromLatLng(Position position) async {
+  Future<void> getAddressFromLatLng(Position position) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
@@ -106,22 +153,41 @@ class AuthCubit extends Cubit<AuthState> {
       if (placemarks.isNotEmpty) {
         Placemark place = placemarks[0];
 
-        _currentAddress = '${place.country},${place.street},${place.locality}';
+        currentAddress = '${place.country},${place.street},${place.locality}';
       }
     } catch (e) {
       debugPrint(e.toString());
 
-      _currentAddress = "لا يمكن جلب العنوان";
+      currentAddress = "لا يمكن جلب العنوان";
     }
   }
 
-  void onSignUp() async {
+  Future<String> imageUrl() async {
+    if (img == null) {
+      emit(AuthFailure(message: 'Please select an image.'));
+      return '';
+    }
+
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('UserImages')
+        .child('${_credential.currentUser!.uid}.png');
+    await storageRef.putFile(img!);
+    final imgUrl = await storageRef.getDownloadURL();
+    return imgUrl;
+  }
+
+  void onSignUp({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
     emit(AuthLoading());
 
     try {
       await _credential.createUserWithEmailAndPassword(
-        email: _currentUserInfo?.email ?? '',
-        password: _currentUserInfo?.password ?? '',
+        email: email,
+        password: password,
       );
 
       if (img == null) {
@@ -138,18 +204,17 @@ class AuthCubit extends Cubit<AuthState> {
 
       final userInfo = UserInfoData(
         image: imgUrl,
-        email: _currentUserInfo?.email ?? '',
-        password: _currentUserInfo?.password ?? '',
+        email: email,
+        password: password,
 
         phoneNumber: number?.phoneNumber ?? '',
         userId: _credential.currentUser!.uid,
-        name: _currentUserInfo?.name ?? '',
+        name: name,
         friends: _currentUserInfo?.friends ?? [],
-        userPlace:
-            '${_currentPosition?.latitude}-${_currentPosition?.longitude}',
+        userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
         userCity:
-            '${_currentAddress.split(',')[1]}-${_currentAddress.split(',')[2]}',
-        userCountry: _currentAddress.split(',')[0],
+            '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+        userCountry: currentAddress.split(',')[0],
       );
 
       await FirebaseFirestore.instance
@@ -172,12 +237,12 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  void onSignIn() async {
+  void onSignIn({required String email, required String password}) async {
     emit(AuthLoading());
     try {
       await _credential.signInWithEmailAndPassword(
-        email: _currentUserInfo?.email ?? '',
-        password: _currentUserInfo?.password ?? '',
+        email: email,
+        password: password,
       );
 
       final userDoc =
@@ -199,11 +264,7 @@ class AuthCubit extends Cubit<AuthState> {
 
       emit(AuthSuccess(userInfo: _currentUserInfo!));
     } on FirebaseAuthException {
-      emit(
-        AuthFailure(
-          message: 'Error signing in: ${_credential.currentUser!.email}',
-        ),
-      );
+      emit(AuthFailure(message: 'Error signing in: '));
     } catch (e) {
       emit(AuthFailure(message: e.toString()));
     }
@@ -235,11 +296,10 @@ class AuthCubit extends Cubit<AuthState> {
         phoneNumber: userCredential.user!.phoneNumber ?? '',
         image: userCredential.user!.photoURL ?? '',
         friends: _currentUserInfo?.friends ?? [],
-        userPlace:
-            '${_currentPosition?.latitude}-${_currentPosition?.longitude}',
+        userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
         userCity:
-            '${_currentAddress.split(',')[1]}-${_currentAddress.split(',')[2]}',
-        userCountry: _currentAddress.split(',')[0],
+            '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+        userCountry: currentAddress.split(',')[0],
       );
 
       final userDoc =
@@ -300,16 +360,16 @@ class AuthCubit extends Cubit<AuthState> {
 
       return;
     }
-    if (_otp.isEmpty) {
+    if (otp.isEmpty) {
       emit(AuthFailure(message: "يرجى إدخال رمز التحقق."));
       return;
     }
-    print('otp قبل التحقق =============================== $_otp');
+    print('otp قبل التحقق =============================== $otp');
     final credential = PhoneAuthProvider.credential(
       verificationId: _verificationId!,
-      smsCode: _otp,
+      smsCode: otp,
     );
-    print('otp=============================== $_otp');
+    print('otp=============================== $otp');
     try {
       await FirebaseAuth.instance.signInWithCredential(credential);
       _currentUserInfo = _currentUserInfo?.copyWith(
@@ -333,7 +393,7 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  void forgetPassword(String email) async {
+  void forgetPassword({required String email}) async {
     emit(AuthLoading());
 
     try {
@@ -374,11 +434,10 @@ class AuthCubit extends Cubit<AuthState> {
       _currentUserInfo = _currentUserInfo?.copyWith(
         name: _currentUserInfo?.name ?? '',
         friends: _currentUserInfo?.friends ?? [],
-        userPlace:
-            '${_currentPosition?.latitude}-${_currentPosition?.longitude}',
+        userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
         userCity:
-            '${_currentAddress.split(',')[1]}-${_currentAddress.split(',')[2]}',
-        userCountry: _currentAddress.split(',')[0],
+            '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+        userCountry: currentAddress.split(',')[0],
 
         email: _currentUserInfo?.email ?? '',
         image: imgUrl,
@@ -398,6 +457,7 @@ class AuthCubit extends Cubit<AuthState> {
       await _googleSignIn.signOut();
 
       _currentUserInfo = null;
+      emit(AuthUnauthenticated());
     } on FirebaseAuthException catch (e) {
       emit(AuthFailure(message: e.toString()));
     }

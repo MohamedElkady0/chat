@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/utils/auth_string.dart';
-import 'package:my_chat/fetcher/presentation/views/splach/splash_view_2.dart';
-
+import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
 import '../widget/app_bar_auth.dart';
 import '../widget/button_auth.dart';
 import '../widget/input_field_auth.dart';
@@ -16,6 +16,7 @@ class ForgetPasswordPage extends StatefulWidget {
 
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
   TextEditingController emailController = TextEditingController();
+  GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -31,37 +32,47 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     return SafeArea(
       child: Scaffold(
         appBar: AppBarAuth(title: 'Password Recovery'),
-        backgroundColor: Theme.of(context).colorScheme.tertiary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
         extendBodyBehindAppBar: true,
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 8),
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: height * 0.1),
-                Image.asset(
-                  AuthString.forgetpasswordImage,
-                  height: height * 0.3,
-                ),
-                SizedBox(height: height * 0.1),
-                InputFieldAuth(
-                  controller: emailController,
-                  title: 'Email',
-                  icon: Icons.email,
-                  obscureText: false,
-                ),
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  SizedBox(height: height * 0.1),
+                  Image.asset(
+                    AuthString.forgetpasswordImage,
+                    height: height * 0.3,
+                  ),
+                  SizedBox(height: height * 0.1),
+                  InputFieldAuth(
+                    controller: emailController,
+                    title: 'Email',
+                    icon: Icons.email,
+                    obscureText: false,
+                  ),
 
-                SizedBox(height: height * 0.1),
-                ButtonAuth(
-                  title: AuthString.resetPassword,
-                  icon: Icons.login,
-                  onPressed: () {
-                    Navigator.of(context).pushReplacement(
-                      MaterialPageRoute(builder: (context) => SplashView2()),
-                    );
-                  },
-                ),
-              ],
+                  SizedBox(height: height * 0.1),
+                  ButtonAuth(
+                    title: AuthString.resetPassword,
+                    icon: Icons.login,
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        BlocProvider.of<AuthCubit>(
+                          context,
+                        ).forgetPassword(email: emailController.text);
+                        formKey.currentState!.save();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Field is required')),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
         ),
