@@ -131,6 +131,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             child: Column(
                               children: [
                                 ButtonAuth(
+                                  isW: true,
                                   title: 'Login',
                                   icon: FontAwesomeIcons.rightToBracket,
                                   onPressed: () {
@@ -143,6 +144,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                                 AppSpacing.vSpaceM,
                                 ButtonAuth(
+                                  isW: true,
                                   title: 'Register',
                                   icon: FontAwesomeIcons.userAstronaut,
                                   onPressed: () {
@@ -155,6 +157,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                                 AppSpacing.vSpaceM,
                                 ButtonAuth(
+                                  isW: true,
                                   title: 'Google',
                                   icon: FontAwesomeIcons.google,
                                   onPressed: () {
@@ -165,6 +168,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                 ),
                                 AppSpacing.vSpaceM,
                                 ButtonAuth(
+                                  isW: true,
                                   title: 'Phone',
                                   icon: FontAwesomeIcons.phone,
                                   onPressed: () {

@@ -131,6 +131,7 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       SizedBox(height: height * 0.05),
                       ButtonAuth(
+                        isW: true,
                         title: 'Register',
                         icon: Icons.person_add,
                         onPressed: () {

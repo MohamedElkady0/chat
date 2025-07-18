@@ -107,6 +107,7 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       SizedBox(height: height * 0.1),
                       ButtonAuth(
+                        isW: true,
                         title: 'Login',
                         icon: Icons.login,
                         onPressed: () {

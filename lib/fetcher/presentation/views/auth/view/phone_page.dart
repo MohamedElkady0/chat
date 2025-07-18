@@ -4,6 +4,7 @@ import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/view/scape_phone_auth.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/enter_otp.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/input_phone.dart';
 import '../widget/app_bar_auth.dart';
 import '../widget/button_auth.dart';
@@ -35,12 +36,25 @@ class _PhonePageState extends State<PhonePage> {
     double width = ConfigApp.width;
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoading) {
-          Center(child: CircularProgressIndicator());
-        } else if (state is AuthFailure) {
-          ScaffoldMessenger.of(
+        if (state is AuthFailure) {
+          Navigator.of(
             context,
-          ).showSnackBar(SnackBar(content: Text(state.message)));
+            rootNavigator: true,
+          ).popUntil((route) => route.isFirst);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(state.message), backgroundColor: Colors.red),
+          );
+        } else if (state is AuthCodeSentSuccess) {
+          showDialog(
+            barrierDismissible: false,
+            context: context,
+            builder: (dialogContext) {
+              return BlocProvider.value(
+                value: BlocProvider.of<AuthCubit>(context),
+                child: EnterOTP(otpController: otpController),
+              );
+            },
+          );
         } else if (state is AuthSuccess) {
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => ScapePhoneAuth()),
@@ -48,6 +62,7 @@ class _PhonePageState extends State<PhonePage> {
         }
       },
       builder: (context, state) {
+        bool isLoading = state is AuthLoading;
         return SafeArea(
           child: Scaffold(
             appBar: AppBarAuth(title: 'Phone'),
@@ -71,76 +86,26 @@ class _PhonePageState extends State<PhonePage> {
                       SizedBox(height: height * 0.1),
                       InputPhone(phoneController: phoneController),
                       SizedBox(height: height * 0.1),
-                      ButtonAuth(
-                        title: 'Send',
-                        icon: Icons.phone_callback,
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            BlocProvider.of<AuthCubit>(context).sendOtp();
-                            showDialog(
-                              barrierDismissible: false,
-                              context: context,
-                              builder:
-                                  (context) => AlertDialog.adaptive(
-                                    icon: IconButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      icon: Icon(Icons.close),
-                                    ),
-                                    title: const Text(
-                                      'Please check your phone',
-                                    ),
-                                    content: TextFormField(
-                                      autofocus: true,
-                                      controller: otpController,
-                                      keyboardType: TextInputType.number,
-                                      onSaved: (newValue) {
-                                        BlocProvider.of<AuthCubit>(context)
-                                            .otp = newValue ?? '';
-                                      },
-                                    ),
-                                    actions: [
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          if (formKey.currentState!
-                                              .validate()) {
-                                            BlocProvider.of<AuthCubit>(
-                                              context,
-                                            ).verifyOtp();
-                                            Navigator.of(
-                                              context,
-                                            ).pushReplacement(
-                                              MaterialPageRoute(
-                                                builder:
-                                                    (context) =>
-                                                        ScapePhoneAuth(),
-                                              ),
-                                            );
-                                            formKey.currentState!.save();
-                                          }
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          BlocProvider.of<AuthCubit>(
-                                            context,
-                                          ).sendOtp();
-                                        },
-                                        child: const Text('ارسل من جديد'),
-                                      ),
-                                    ],
-                                  ),
-                            );
-                            formKey.currentState!.save();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Please fill all fields')),
-                            );
-                          }
-                        },
-                      ),
+                      if (isLoading)
+                        const CircularProgressIndicator()
+                      else
+                        ButtonAuth(
+                          isW: true,
+                          title: 'Send',
+                          icon: Icons.phone_callback,
+                          onPressed: () {
+                            if (formKey.currentState!.validate()) {
+                              formKey.currentState!.save();
+                              BlocProvider.of<AuthCubit>(context).sendOtp();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Please fill all fields'),
+                                ),
+                              );
+                            }
+                          },
+                        ),
                     ],
                   ),
                 ),

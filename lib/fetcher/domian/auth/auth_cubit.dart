@@ -33,9 +33,14 @@ class AuthCubit extends Cubit<AuthState> {
 
   bool isRegister = true;
   File? img;
-  String otp = '';
+  String _otp = '';
+  String get otp => _otp;
+  void setOtp(String value) => _otp = value;
   String? _verificationId;
-  PhoneNumber? number;
+  PhoneNumber number = PhoneNumber(isoCode: 'EG');
+  String _phoneNumber = '';
+  void setPhoneNumber(String value) => _phoneNumber = value;
+  String get phoneNumber => _phoneNumber;
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
 
@@ -46,6 +51,22 @@ class AuthCubit extends Cubit<AuthState> {
   SharedPreferences? prefs;
 
   AuthCubit() : super(AuthInitial());
+
+  Future<String> imageUrl() async {
+    if (img == null) {
+      emit(AuthFailure(message: 'Please select an image.'));
+      return '';
+    }
+
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('UserImages')
+        .child('${_credential.currentUser!.uid}.png');
+    await storageRef.putFile(img!);
+    final imgUrl = await storageRef.getDownloadURL();
+
+    return imgUrl;
+  }
 
   Future<void> checkAppState() async {
     final prefs = await SharedPreferences.getInstance();
@@ -162,21 +183,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<String> imageUrl() async {
-    if (img == null) {
-      emit(AuthFailure(message: 'Please select an image.'));
-      return '';
-    }
-
-    final storageRef = FirebaseStorage.instance
-        .ref()
-        .child('UserImages')
-        .child('${_credential.currentUser!.uid}.png');
-    await storageRef.putFile(img!);
-    final imgUrl = await storageRef.getDownloadURL();
-    return imgUrl;
-  }
-
   void onSignUp({
     required String name,
     required String email,
@@ -207,7 +213,7 @@ class AuthCubit extends Cubit<AuthState> {
         email: email,
         password: password,
 
-        phoneNumber: number?.phoneNumber ?? '',
+        phoneNumber: number.phoneNumber ?? '',
         userId: _credential.currentUser!.uid,
         name: name,
         friends: _currentUserInfo?.friends ?? [],
@@ -331,22 +337,24 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   void sendOtp() async {
+    emit(AuthLoading());
     await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: _currentUserInfo?.phoneNumber ?? '',
+      phoneNumber: _phoneNumber,
       verificationCompleted: (PhoneAuthCredential credential) async {
         await FirebaseAuth.instance.signInWithCredential(credential);
-        _currentUserInfo = _currentUserInfo?.copyWith(
-          userId: _credential.currentUser!.uid,
-          phoneNumber: _currentUserInfo?.phoneNumber ?? '',
-        );
-        emit(AuthSuccess(userInfo: _currentUserInfo!));
+        if (FirebaseAuth.instance.currentUser != null) {
+          emit(AuthSuccess(userInfo: _currentUserInfo!));
+        } else {
+          emit(AuthFailure(message: "فشل التحقق التلقائي"));
+        }
       },
       verificationFailed: (FirebaseAuthException e) {
         emit(AuthFailure(message: "فشل التحقق: ${e.message}"));
       },
       codeSent: (String verificationId, int? resendToken) {
         _verificationId = verificationId;
-        emit(AuthFailure(message: "تم إرسال OTP!"));
+
+        emit(AuthCodeSentSuccess());
       },
       codeAutoRetrievalTimeout: (String verificationId) {
         _verificationId = verificationId;
@@ -357,28 +365,67 @@ class AuthCubit extends Cubit<AuthState> {
   void verifyOtp() async {
     if (_verificationId == null) {
       emit(AuthFailure(message: "لم يتم إرسال OTP بعد."));
-
       return;
     }
-    if (otp.isEmpty) {
+    if (_otp.isEmpty) {
       emit(AuthFailure(message: "يرجى إدخال رمز التحقق."));
       return;
     }
-    print('otp قبل التحقق =============================== $otp');
+
+    emit(AuthLoading());
     final credential = PhoneAuthProvider.credential(
       verificationId: _verificationId!,
-      smsCode: otp,
+      smsCode: _otp,
     );
-    print('otp=============================== $otp');
+
     try {
-      await FirebaseAuth.instance.signInWithCredential(credential);
-      _currentUserInfo = _currentUserInfo?.copyWith(
-        phoneNumber: _currentUserInfo?.phoneNumber ?? '',
-        userId: _credential.currentUser!.uid,
-      );
-      emit(AuthSuccess(userInfo: _currentUserInfo!));
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithCredential(credential);
+      if (userCredential.user != null) {
+        final userInfo = UserInfoData(
+          image: '',
+          email: '',
+          password: '',
+
+          phoneNumber: number.phoneNumber ?? '',
+          userId: userCredential.user!.uid,
+          name: '',
+          friends: _currentUserInfo?.friends ?? [],
+          userPlace:
+              '${currentPosition?.latitude}-${currentPosition?.longitude}',
+          userCity:
+              '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+          userCountry: currentAddress.split(',')[0],
+        );
+
+        final userDoc =
+            await FirebaseFirestore.instance
+                .collection('Users')
+                .doc(userCredential.user!.uid)
+                .get();
+
+        if (userDoc.exists) {
+          _currentUserInfo = UserInfoData.fromJson(userDoc.data()!);
+        } else {
+          await FirebaseFirestore.instance
+              .collection('Users')
+              .doc(userCredential.user!.uid)
+              .set(userInfo.toJson());
+          _currentUserInfo = userInfo;
+        }
+
+        emit(AuthSuccess(userInfo: _currentUserInfo!));
+      } else {
+        emit(AuthFailure(message: "فشل التحقق، لم يتم العثور على المستخدم."));
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'invalid-verification-code') {
+        emit(AuthFailure(message: "رمز التحقق غير صحيح."));
+      } else {
+        emit(AuthFailure(message: "فشل التحقق: ${e.message}"));
+      }
     } catch (e) {
-      emit(AuthFailure(message: "فشل التحقق: ${e.toString()}"));
+      emit(AuthFailure(message: "حدث خطأ غير متوقع: ${e.toString()}"));
     }
   }
 
@@ -468,23 +515,43 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthInitial());
   }
 
-  void updateName(String name) {
+  void updateName(String name) async {
     _currentUserInfo = _currentUserInfo?.copyWith(name: name);
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_credential.currentUser!.uid)
+        .update(_currentUserInfo!.toJson());
   }
 
-  void updatePhoneNumber(String phoneNumber) {
+  void updatePhoneNumber(String phoneNumber) async {
     _currentUserInfo = _currentUserInfo?.copyWith(phoneNumber: phoneNumber);
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_credential.currentUser!.uid)
+        .update(_currentUserInfo!.toJson());
   }
 
-  void updateImage(String image) {
+  void updateImage(String image) async {
     _currentUserInfo = _currentUserInfo?.copyWith(image: image);
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_credential.currentUser!.uid)
+        .update(_currentUserInfo!.toJson());
   }
 
-  void updatePassword(String password) {
+  void updatePassword(String password) async {
     _currentUserInfo = _currentUserInfo?.copyWith(password: password);
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_credential.currentUser!.uid)
+        .update(_currentUserInfo!.toJson());
   }
 
-  void updateEmail(String email) {
+  void updateEmail(String email) async {
     _currentUserInfo = _currentUserInfo?.copyWith(email: email);
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_credential.currentUser!.uid)
+        .update(_currentUserInfo!.toJson());
   }
 }

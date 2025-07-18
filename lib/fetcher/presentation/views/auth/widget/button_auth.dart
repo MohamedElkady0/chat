@@ -9,11 +9,13 @@ class ButtonAuth extends StatelessWidget {
     required this.title,
     required this.icon,
     this.onPressed,
+    required this.isW,
   });
 
   final String title;
   final IconData icon;
   final VoidCallback? onPressed;
+  final bool isW;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,7 @@ class ButtonAuth extends StatelessWidget {
     double width = ConfigApp.width;
 
     return SizedBox(
-      width: width * 0.8,
+      width: isW ? width * 0.8 : width * .4,
       child: ElevatedButton.icon(
         icon: Icon(
           icon,

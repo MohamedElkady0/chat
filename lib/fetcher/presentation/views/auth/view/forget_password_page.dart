@@ -56,6 +56,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
                   SizedBox(height: height * 0.1),
                   ButtonAuth(
+                    isW: true,
                     title: AuthString.resetPassword,
                     icon: Icons.login,
                     onPressed: () {

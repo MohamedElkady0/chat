@@ -30,22 +30,10 @@ class AuthImagePicked extends AuthState {
   AuthImagePicked(this.image);
 }
 
-class Authenticated extends AuthState {
-  final User user;
-
-  Authenticated(this.user);
-
-  List<Object> get props => [user];
-}
-
-class PageViewState extends AuthState {
-  final bool watched;
-
-  PageViewState({required this.watched});
-}
-
 class ShowOnboardingState extends AuthState {}
 
 class AuthAuthenticated extends AuthState {}
 
 class AuthUnauthenticated extends AuthState {}
+
+class AuthCodeSentSuccess extends AuthState {}

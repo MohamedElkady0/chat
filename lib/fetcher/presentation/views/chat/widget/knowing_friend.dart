@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
+import 'package:transparent_image/transparent_image.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -60,12 +61,17 @@ class _MapScreenState extends State<MapScreen> {
                         child: CircleAvatar(
                           radius: 20,
                           backgroundColor: Colors.blue,
-                          backgroundImage: NetworkImage(
-                            BlocProvider.of<AuthCubit>(
-                                  context,
-                                ).currentUserInfo?.image ??
-                                '',
-                          ),
+                          backgroundImage:
+                              BlocProvider.of<AuthCubit>(
+                                        context,
+                                      ).currentUserInfo?.image !=
+                                      null
+                                  ? NetworkImage(
+                                    BlocProvider.of<AuthCubit>(
+                                      context,
+                                    ).currentUserInfo!.image!,
+                                  )
+                                  : MemoryImage(kTransparentImage),
                         ),
                       ),
                     ],

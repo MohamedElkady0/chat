@@ -26,6 +26,9 @@ class InputPhone extends StatelessWidget {
         textStyle: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
         onInputChanged: (PhoneNumber number) {
           BlocProvider.of<AuthCubit>(context).number = number;
+          BlocProvider.of<AuthCubit>(
+            context,
+          ).setPhoneNumber(number.phoneNumber!);
         },
         validator: (value) {
           if (value == null || value.trim().isEmpty) {
@@ -50,7 +53,9 @@ class InputPhone extends StatelessWidget {
         ),
         inputBorder: const OutlineInputBorder(),
         onSaved: (PhoneNumber number) {
-          BlocProvider.of<AuthCubit>(context).number = number;
+          BlocProvider.of<AuthCubit>(
+            context,
+          ).getPhoneNumber(number.phoneNumber!);
         },
         inputDecoration: const InputDecoration(
           hintText: 'Enter Your Phone Number',
