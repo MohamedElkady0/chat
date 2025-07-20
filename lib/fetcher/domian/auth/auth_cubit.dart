@@ -20,6 +20,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
+  AuthCubit() : super(AuthInitial());
+
   late StreamSubscription _authSubscription;
   final FirebaseAuth _credential = FirebaseAuth.instance;
 
@@ -50,24 +52,6 @@ class AuthCubit extends Cubit<AuthState> {
   bool isLoading = true;
   SharedPreferences? prefs;
 
-  AuthCubit() : super(AuthInitial());
-
-  Future<String> imageUrl() async {
-    if (img == null) {
-      emit(AuthFailure(message: 'Please select an image.'));
-      return '';
-    }
-
-    final storageRef = FirebaseStorage.instance
-        .ref()
-        .child('UserImages')
-        .child('${_credential.currentUser!.uid}.png');
-    await storageRef.putFile(img!);
-    final imgUrl = await storageRef.getDownloadURL();
-
-    return imgUrl;
-  }
-
   Future<void> checkAppState() async {
     final prefs = await SharedPreferences.getInstance();
     final bool hasSeenOnboarding = prefs.getBool('seenOnboarding') ?? false;
@@ -89,22 +73,6 @@ class AuthCubit extends Cubit<AuthState> {
     await prefs.setBool('seenOnboarding', true);
 
     emit(AuthUnauthenticated());
-  }
-
-  void pickImage({required String title}) async {
-    final ImagePicker picker = ImagePicker();
-    XFile? pickedFile;
-    if (title == 'Gallery') {
-      pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    } else {
-      pickedFile = await picker.pickImage(source: ImageSource.camera);
-    }
-    if (pickedFile == null) {
-      return;
-    }
-
-    img = File(pickedFile.path);
-    emit(AuthImagePicked(img!));
   }
 
   Future<void> getCurrentLocation() async {
@@ -188,35 +156,34 @@ class AuthCubit extends Cubit<AuthState> {
     required String email,
     required String password,
   }) async {
+    if (img == null) {
+      emit(AuthFailure(message: 'الرجاء اختيار صورة شخصية.'));
+      return;
+    }
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      emit(AuthFailure(message: 'الرجاء ملء جميع الحقول.'));
+      return;
+    }
+
     emit(AuthLoading());
 
+    UserCredential? userCredential;
+
     try {
-      await _credential.createUserWithEmailAndPassword(
+      userCredential = await _credential.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      if (img == null) {
-        emit(AuthFailure(message: 'Please select an image.'));
-        return;
-      }
-
-      final storageRef = FirebaseStorage.instance
-          .ref()
-          .child('UserImages')
-          .child('${_credential.currentUser!.uid}.png');
-      await storageRef.putFile(img!);
-      final imgUrl = await storageRef.getDownloadURL();
+      final String imgUrl = await _uploadImageAndGetUrl(img!);
 
       final userInfo = UserInfoData(
         image: imgUrl,
         email: email,
-        password: password,
-
         phoneNumber: number.phoneNumber ?? '',
-        userId: _credential.currentUser!.uid,
+        userId: userCredential.user!.uid,
         name: name,
-        friends: _currentUserInfo?.friends ?? [],
+        friends: [],
         userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
         userCity:
             '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
@@ -225,21 +192,25 @@ class AuthCubit extends Cubit<AuthState> {
 
       await FirebaseFirestore.instance
           .collection('Users')
-          .doc(_credential.currentUser!.uid)
+          .doc(userCredential.user!.uid)
           .set(userInfo.toJson());
 
       _currentUserInfo = userInfo;
       emit(AuthSuccess(userInfo: _currentUserInfo!));
-    } on FirebaseAuthException {
-      emit(
-        AuthFailure(
-          message: 'Error creating user: ${_credential.currentUser!.email}',
-        ),
-      );
-    } on FirebaseException catch (e) {
-      emit(AuthFailure(message: 'Error uploading image: ${e.message}'));
+    } on FirebaseAuthException catch (e) {
+      String message = 'حدث خطأ أثناء إنشاء الحساب.';
+      if (e.code == 'email-already-in-use') {
+        message = 'هذا البريد الإلكتروني مستخدم بالفعل.';
+      } else if (e.code == 'weak-password') {
+        message = 'كلمة المرور ضعيفة جداً.';
+      }
+      emit(AuthFailure(message: message));
     } catch (e) {
-      emit(AuthFailure(message: e.toString()));
+      if (userCredential != null) {
+        await userCredential.user?.delete();
+      }
+
+      emit(AuthFailure(message: 'فشل إكمال التسجيل: ${e.toString()}'));
     }
   }
 
@@ -382,38 +353,36 @@ class AuthCubit extends Cubit<AuthState> {
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithCredential(credential);
       if (userCredential.user != null) {
-        final userInfo = UserInfoData(
-          image: '',
-          email: '',
-          password: '',
+        final userRef = FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userCredential.user!.uid);
+        await FirebaseFirestore.instance.runTransaction((transaction) async {
+          final userDoc = await transaction.get(userRef);
+          if (userDoc.exists) {
+            _currentUserInfo = UserInfoData.fromJson(userDoc.data()!);
+          } else {
+            final userInfo = UserInfoData(
+              image: '',
+              email: '',
+              password: '',
 
-          phoneNumber: number.phoneNumber ?? '',
-          userId: userCredential.user!.uid,
-          name: '',
-          friends: _currentUserInfo?.friends ?? [],
-          userPlace:
-              '${currentPosition?.latitude}-${currentPosition?.longitude}',
-          userCity:
-              '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
-          userCountry: currentAddress.split(',')[0],
-        );
-
-        final userDoc =
+              phoneNumber: number.phoneNumber ?? '',
+              userId: userCredential.user!.uid,
+              name: '',
+              friends: _currentUserInfo?.friends ?? [],
+              userPlace:
+                  '${currentPosition?.latitude}-${currentPosition?.longitude}',
+              userCity:
+                  '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+              userCountry: currentAddress.split(',')[0],
+            );
             await FirebaseFirestore.instance
                 .collection('Users')
                 .doc(userCredential.user!.uid)
-                .get();
-
-        if (userDoc.exists) {
-          _currentUserInfo = UserInfoData.fromJson(userDoc.data()!);
-        } else {
-          await FirebaseFirestore.instance
-              .collection('Users')
-              .doc(userCredential.user!.uid)
-              .set(userInfo.toJson());
-          _currentUserInfo = userInfo;
-        }
-
+                .set(userInfo.toJson());
+            _currentUserInfo = userInfo;
+          }
+        });
         emit(AuthSuccess(userInfo: _currentUserInfo!));
       } else {
         emit(AuthFailure(message: "فشل التحقق، لم يتم العثور على المستخدم."));
@@ -469,33 +438,6 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  void updateUserNextPhoneAuth() async {
-    final storageRef = FirebaseStorage.instance
-        .ref()
-        .child('UserImages')
-        .child('${_credential.currentUser!.uid}.png');
-    await storageRef.putFile(img!);
-    final imgUrl = await storageRef.getDownloadURL();
-    emit(AuthLoading());
-    try {
-      _currentUserInfo = _currentUserInfo?.copyWith(
-        name: _currentUserInfo?.name ?? '',
-        friends: _currentUserInfo?.friends ?? [],
-        userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
-        userCity:
-            '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
-        userCountry: currentAddress.split(',')[0],
-
-        email: _currentUserInfo?.email ?? '',
-        image: imgUrl,
-      );
-
-      emit(AuthSuccess(userInfo: _currentUserInfo!));
-    } on FirebaseAuthException catch (e) {
-      emit(AuthFailure(message: e.toString()));
-    }
-  }
-
   void signOut() async {
     emit(AuthLoading());
     try {
@@ -515,6 +457,69 @@ class AuthCubit extends Cubit<AuthState> {
     emit(AuthInitial());
   }
 
+  void pickImage({required String title}) async {
+    final ImagePicker picker = ImagePicker();
+    XFile? pickedFile;
+    if (title == 'Gallery') {
+      pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    } else {
+      pickedFile = await picker.pickImage(source: ImageSource.camera);
+    }
+    if (pickedFile == null) {
+      return;
+    }
+
+    img = File(pickedFile.path);
+    emit(AuthImagePicked(img!));
+  }
+
+  Future<String> _uploadImageAndGetUrl(File imageFile) async {
+    try {
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('UserImages')
+          .child('${_credential.currentUser!.uid}.png');
+
+      await storageRef.putFile(imageFile);
+      final imgUrl = await storageRef.getDownloadURL();
+      return imgUrl;
+    } catch (e) {
+      throw Exception('فشل رفع الصورة: ${e.toString()}');
+    }
+  }
+
+  void uploadAndUpdateProfileImage() async {
+    if (img == null) {
+      emit(AuthFailure(message: 'الرجاء اختيار صورة أولاً.'));
+      return;
+    }
+
+    emit(AuthLoading());
+
+    try {
+      final String imgUrl = await _uploadImageAndGetUrl(img!);
+
+      await _updateUserDocument(imgUrl);
+
+      emit(AuthUpdateSuccess());
+    } catch (e) {
+      emit(AuthFailure(message: e.toString()));
+    }
+  }
+
+  Future<void> _updateUserDocument(String imageUrl) async {
+    try {
+      _currentUserInfo = _currentUserInfo?.copyWith(image: imageUrl);
+
+      await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(_credential.currentUser!.uid)
+          .update({'image': imageUrl});
+    } catch (e) {
+      throw Exception('فشل تحديث بيانات المستخدم: ${e.toString()}');
+    }
+  }
+
   void updateName(String name) async {
     _currentUserInfo = _currentUserInfo?.copyWith(name: name);
     await FirebaseFirestore.instance
@@ -531,14 +536,6 @@ class AuthCubit extends Cubit<AuthState> {
         .update(_currentUserInfo!.toJson());
   }
 
-  void updateImage(String image) async {
-    _currentUserInfo = _currentUserInfo?.copyWith(image: image);
-    await FirebaseFirestore.instance
-        .collection('Users')
-        .doc(_credential.currentUser!.uid)
-        .update(_currentUserInfo!.toJson());
-  }
-
   void updatePassword(String password) async {
     _currentUserInfo = _currentUserInfo?.copyWith(password: password);
     await FirebaseFirestore.instance
@@ -549,6 +546,20 @@ class AuthCubit extends Cubit<AuthState> {
 
   void updateEmail(String email) async {
     _currentUserInfo = _currentUserInfo?.copyWith(email: email);
+    await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(_credential.currentUser!.uid)
+        .update(_currentUserInfo!.toJson());
+  }
+
+  void updateLocation() async {
+    getCurrentLocation();
+    _currentUserInfo = _currentUserInfo?.copyWith(
+      userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
+      userCity:
+          '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+      userCountry: currentAddress.split(',')[0],
+    );
     await FirebaseFirestore.instance
         .collection('Users')
         .doc(_credential.currentUser!.uid)

@@ -68,7 +68,6 @@ class _ScapePhoneAuthState extends State<ScapePhoneAuth> {
 
                             final authCubit = context.read<AuthCubit>();
                             authCubit.updateName(nameController.text);
-                            authCubit.updateImage(await authCubit.imageUrl());
 
                             if (!context.mounted) return;
 

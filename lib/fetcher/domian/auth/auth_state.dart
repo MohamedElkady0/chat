@@ -37,3 +37,5 @@ class AuthAuthenticated extends AuthState {}
 class AuthUnauthenticated extends AuthState {}
 
 class AuthCodeSentSuccess extends AuthState {}
+
+class AuthUpdateSuccess extends AuthState {}
