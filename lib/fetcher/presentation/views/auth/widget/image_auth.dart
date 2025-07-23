@@ -23,6 +23,7 @@ class ImageAuth extends StatelessWidget {
           borderRadius: BorderRadius.circular(40),
           onTap: () {
             context.read<AuthCubit>().pickImage(title: 'Gallery');
+            imageFile = context.read<AuthCubit>().img;
           },
           child: CircleAvatar(
             radius: width * 0.13,
@@ -34,6 +35,7 @@ class ImageAuth extends StatelessWidget {
                     ? IconButton(
                       onPressed: () {
                         context.read<AuthCubit>().pickImage(title: 'Camera');
+                        imageFile = context.read<AuthCubit>().img;
                       },
                       icon: Icon(
                         Icons.add_a_photo,

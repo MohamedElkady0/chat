@@ -36,13 +36,15 @@ class _LoginPageState extends State<LoginPage> {
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoading) {
-          Center(child: CircularProgressIndicator());
-        } else if (state is AuthFailure) {
+        if (state is AuthFailure) {
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
         } else if (state is AuthSuccess) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('اهلا بعودتك !')));
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => SplashView()),
           );
@@ -54,81 +56,93 @@ class _LoginPageState extends State<LoginPage> {
             appBar: AppBarAuth(title: 'Login'),
             backgroundColor: Theme.of(context).colorScheme.primary,
             extendBodyBehindAppBar: true,
-            body: Padding(
-              padding: AppSpacing.horizontalM,
-              child: SingleChildScrollView(
-                child: Form(
-                  key: formKey,
-                  child: Column(
-                    children: [
-                      SizedBox(height: height * 0.2),
-                      InputFieldAuth(
-                        controller: emailController,
-                        title: 'Email',
-                        icon: Icons.email,
-                        obscureText: false,
-                        onSaved: (value) => emailController.text = value ?? '',
-                      ),
-                      SizedBox(height: height * 0.02),
-                      InputFieldAuth(
-                        controller: passwordController,
-                        title: 'Password',
-                        icon:
-                            visibility
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+            body:
+                state is AuthLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : Padding(
+                      padding: AppSpacing.horizontalM,
+                      child: SingleChildScrollView(
+                        child: Form(
+                          key: formKey,
+                          child: Column(
+                            children: [
+                              SizedBox(height: height * 0.2),
+                              InputFieldAuth(
+                                controller: emailController,
+                                title: 'Email',
+                                icon: Icons.email,
+                                obscureText: false,
+                                onSaved:
+                                    (value) =>
+                                        emailController.text = value ?? '',
+                              ),
+                              SizedBox(height: height * 0.02),
+                              InputFieldAuth(
+                                controller: passwordController,
+                                title: 'Password',
+                                icon:
+                                    visibility
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
 
-                        obscureText: visibility,
-                        onPressed:
-                            () => setState(() {
-                              visibility = !visibility;
-                            }),
-                        onSaved:
-                            (value) => passwordController.text = value ?? '',
-                      ),
-                      SizedBox(height: height * 0.05),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ForgetPasswordPage(),
-                            ),
-                          );
-                        },
-                        child: Text(
-                          'Forget Password !',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                            fontSize: 16,
+                                obscureText: visibility,
+                                onPressed:
+                                    () => setState(() {
+                                      visibility = !visibility;
+                                    }),
+                                onSaved:
+                                    (value) =>
+                                        passwordController.text = value ?? '',
+                              ),
+                              SizedBox(height: height * 0.05),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => ForgetPasswordPage(),
+                                    ),
+                                  );
+                                },
+                                child: Text(
+                                  'Forget Password !',
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodyLarge!.copyWith(
+                                    color:
+                                        Theme.of(context).colorScheme.onPrimary,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: height * 0.1),
+                              ButtonAuth(
+                                isW: true,
+                                title: 'Login',
+                                icon: Icons.login,
+                                onPressed: () {
+                                  if (formKey.currentState!.validate()) {
+                                    BlocProvider.of<AuthCubit>(
+                                      context,
+                                    ).onSignIn(
+                                      email: emailController.text,
+                                      password: passwordController.text,
+                                    );
+                                    formKey.currentState!.save();
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Please fill all fields'),
+                                      ),
+                                    );
+                                  }
+                                },
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      SizedBox(height: height * 0.1),
-                      ButtonAuth(
-                        isW: true,
-                        title: 'Login',
-                        icon: Icons.login,
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {
-                            BlocProvider.of<AuthCubit>(context).onSignIn(
-                              email: emailController.text,
-                              password: passwordController.text,
-                            );
-                            formKey.currentState!.save();
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Please fill all fields')),
-                            );
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+                    ),
           ),
         );
       },

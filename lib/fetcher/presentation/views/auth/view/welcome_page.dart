@@ -9,6 +9,7 @@ import 'package:my_chat/fetcher/presentation/views/auth/view/login_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/view/phone_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/view/register_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/check_service.dart';
 import 'package:my_chat/fetcher/presentation/views/splach/splash_view.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -25,6 +26,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
   late AnimationController _alignmentController;
   late Animation<Alignment> alignment;
+  bool agree = false;
 
   @override
   void initState() {
@@ -71,13 +73,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
 
     return BlocConsumer<AuthCubit, AuthState>(
       listener: (context, state) {
-        if (state is AuthLoading) {
-          Center(child: CircularProgressIndicator());
-        } else if (state is AuthFailure) {
+        if (state is AuthFailure) {
+          ScaffoldMessenger.of(context).clearSnackBars();
           ScaffoldMessenger.of(
             context,
           ).showSnackBar(SnackBar(content: Text(state.message)));
         } else if (state is AuthSuccess) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Registration successful!')));
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => SplashView()),
           );
@@ -87,109 +92,130 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         return SafeArea(
           child: Scaffold(
             backgroundColor: Colors.black54,
-            body: Stack(
-              children: [
-                AnimatedBuilder(
-                  animation: _alignmentController,
-                  builder: (BuildContext context, Widget? child) {
-                    return AlignTransition(
-                      alignment: alignment,
-                      child: Container(
-                        height: height * 0.5,
-                        width: width * 0.5,
-                        decoration: const BoxDecoration(
-                          image: DecorationImage(
-                            image: AssetImage('assets/images/slack.png'),
+            body:
+                state is AuthLoading
+                    ? Center(child: CircularProgressIndicator())
+                    : Stack(
+                      children: [
+                        AnimatedBuilder(
+                          animation: _alignmentController,
+                          builder: (BuildContext context, Widget? child) {
+                            return AlignTransition(
+                              alignment: alignment,
+                              child: Container(
+                                height: height * 0.5,
+                                width: width * 0.5,
+                                decoration: const BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage(
+                                      'assets/images/slack.png',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          child: SizedBox(),
+                        ),
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              SizedBox(height: height * 0.1),
+                              Text(
+                                'Welcome to My Chat',
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.displayLarge!.copyWith(
+                                  fontFamily: GoogleFonts.praise().fontFamily,
+                                  fontWeight: FontWeight.w600,
+                                  color:
+                                      Theme.of(context).colorScheme.onPrimary,
+                                ),
+                              ),
+                              AppSpacing.vSpaceXXL,
+                              AnimatedBuilder(
+                                animation: _controller,
+                                builder: (BuildContext context, Widget? child) {
+                                  return Transform.scale(
+                                    scale: _animation.value,
+                                    child: Column(
+                                      children: [
+                                        ButtonAuth(
+                                          isW: true,
+                                          title: 'Login',
+                                          icon: FontAwesomeIcons.rightToBracket,
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) => LoginPage(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        AppSpacing.vSpaceM,
+                                        ButtonAuth(
+                                          isW: true,
+                                          title: 'Register',
+                                          icon: FontAwesomeIcons.userAstronaut,
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) => RegisterPage(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                        AppSpacing.vSpaceM,
+                                        ButtonAuth(
+                                          isW: true,
+                                          title: 'Google',
+                                          icon: FontAwesomeIcons.google,
+                                          onPressed: () {
+                                            BlocProvider.of<AuthCubit>(
+                                              context,
+                                            ).signInWithGoogle();
+                                            showDialog(
+                                              context: context,
+                                              builder:
+                                                  (context) => CheckService(
+                                                    value: agree,
+                                                    onChanged: (val) {
+                                                      setState(() {
+                                                        agree = val!;
+                                                      });
+                                                    },
+                                                  ),
+                                            );
+                                          },
+                                        ),
+                                        AppSpacing.vSpaceM,
+                                        ButtonAuth(
+                                          isW: true,
+                                          title: 'Phone',
+                                          icon: FontAwesomeIcons.phone,
+                                          onPressed: () {
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder:
+                                                    (context) => PhonePage(),
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                },
+                                child: const SizedBox(),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    );
-                  },
-                  child: SizedBox(),
-                ),
-                Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      SizedBox(height: height * 0.1),
-                      Text(
-                        'Welcome to My Chat',
-                        style: Theme.of(
-                          context,
-                        ).textTheme.displayLarge!.copyWith(
-                          fontFamily: GoogleFonts.praise().fontFamily,
-                          fontWeight: FontWeight.w600,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                      ),
-                      AppSpacing.vSpaceXXL,
-                      AnimatedBuilder(
-                        animation: _controller,
-                        builder: (BuildContext context, Widget? child) {
-                          return Transform.scale(
-                            scale: _animation.value,
-                            child: Column(
-                              children: [
-                                ButtonAuth(
-                                  isW: true,
-                                  title: 'Login',
-                                  icon: FontAwesomeIcons.rightToBracket,
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => LoginPage(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                AppSpacing.vSpaceM,
-                                ButtonAuth(
-                                  isW: true,
-                                  title: 'Register',
-                                  icon: FontAwesomeIcons.userAstronaut,
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => RegisterPage(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                                AppSpacing.vSpaceM,
-                                ButtonAuth(
-                                  isW: true,
-                                  title: 'Google',
-                                  icon: FontAwesomeIcons.google,
-                                  onPressed: () {
-                                    BlocProvider.of<AuthCubit>(
-                                      context,
-                                    ).signInWithGoogle();
-                                  },
-                                ),
-                                AppSpacing.vSpaceM,
-                                ButtonAuth(
-                                  isW: true,
-                                  title: 'Phone',
-                                  icon: FontAwesomeIcons.phone,
-                                  onPressed: () {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => PhonePage(),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const SizedBox(),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+                      ],
+                    ),
           ),
         );
       },

@@ -98,6 +98,7 @@ class _PhonePageState extends State<PhonePage> {
                               formKey.currentState!.save();
                               BlocProvider.of<AuthCubit>(context).sendOtp();
                             } else {
+                              ScaffoldMessenger.of(context).clearSnackBars();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text('Please fill all fields'),

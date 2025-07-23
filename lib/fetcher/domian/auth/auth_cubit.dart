@@ -51,6 +51,7 @@ class AuthCubit extends Cubit<AuthState> {
   MapController? mapController;
   bool isLoading = true;
   SharedPreferences? prefs;
+  //final FacebookAuth _facebookAuthResult = FacebookAuth.instance;
 
   Future<void> checkAppState() async {
     final prefs = await SharedPreferences.getInstance();
@@ -306,6 +307,63 @@ class AuthCubit extends Cubit<AuthState> {
       }
     }
   }
+
+  //   Future<User?> signInWithFacebook() async {
+  //     emit(AuthLoading());
+  //     try {
+  //       final LoginResult loginResult = await _facebookAuthResult.login();
+
+  //       if (loginResult.status == LoginStatus.success) {
+  //         final AccessToken accessToken = loginResult.accessToken!;
+  //         final OAuthCredential credentialAuth =
+  //             FacebookAuthProvider.credential(accessToken.tokenString);
+  //         final UserCredential userCredential =
+  //             await _credential.signInWithCredential(credentialAuth);
+
+  // UserInfoData userInfo = UserInfoData(
+  //   userId: userCredential.user!.uid,
+  //   name: userCredential.user!.displayName ?? '',
+  //   email: userCredential.user!.email ?? '',
+  //   phoneNumber: userCredential.user!.phoneNumber ?? '',
+  //   image: userCredential.user!.photoURL ?? '',
+  //   friends: _currentUserInfo?.friends ?? [],
+  //   userPlace: '${currentPosition?.latitude}-${currentPosition?.longitude}',
+  //   userCity:
+  //       '${currentAddress.split(',')[1]}-${currentAddress.split(',')[2]}',
+  //   userCountry: currentAddress.split(',')[0],
+  // );
+
+  //         final userDoc = await FirebaseFirestore.instance
+  //             .collection('Users')
+  //             .doc(userCredential.user!.uid)
+  //             .get();
+
+  //         if (userDoc.exists) {
+
+  //           await FirebaseFirestore.instance
+  //               .collection('Users')
+  //               .doc(userCredential.user!.uid)
+  //               .update(userInfo.toJson());
+  //         } else {
+
+  //           await FirebaseFirestore.instance
+  //               .collection('Users')
+  //               .doc(userCredential.user!.uid)
+  //               .set(userInfo.toJson());
+  //         }
+  //         _currentUserInfo = userInfo;
+  //         emit(AuthSuccess());
+  //         return userCredential.user;
+  //       } else {
+  //         emit(AuthFailure(
+  //             message: 'خطأ في تسجيل الدخول: ${loginResult.message}'));
+  //         return null;
+  //       }
+  //     } catch (e) {
+
+  //       return null;
+  //     }
+  //   }
 
   void sendOtp() async {
     emit(AuthLoading());

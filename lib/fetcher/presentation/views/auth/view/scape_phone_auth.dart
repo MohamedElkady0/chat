@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/check_service.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/image_auth.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/input_field_auth.dart';
-import 'package:my_chat/fetcher/presentation/views/splach/splash_view.dart';
 
 class ScapePhoneAuth extends StatefulWidget {
   const ScapePhoneAuth({super.key});
@@ -17,6 +17,7 @@ class ScapePhoneAuth extends StatefulWidget {
 class _ScapePhoneAuthState extends State<ScapePhoneAuth> {
   final TextEditingController nameController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+  bool check = false;
 
   @override
   void dispose() {
@@ -56,53 +57,33 @@ class _ScapePhoneAuthState extends State<ScapePhoneAuth> {
                   ),
 
                   SizedBox(height: height * 0.3),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      ButtonAuth(
-                        isW: false,
-                        title: 'متابعة',
-                        onPressed: () async {
-                          if (formKey.currentState!.validate()) {
-                            formKey.currentState!.save();
 
-                            final authCubit = context.read<AuthCubit>();
-                            authCubit.updateName(nameController.text);
+                  ButtonAuth(
+                    isW: false,
+                    title: 'متابعة',
+                    onPressed: () async {
+                      if (formKey.currentState!.validate()) {
+                        formKey.currentState!.save();
+                        final authCubit = context.read<AuthCubit>();
+                        authCubit.uploadAndUpdateProfileImage();
 
-                            if (!context.mounted) return;
+                        authCubit.updateName(nameController.text);
 
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => const SplashView(),
+                        showDialog(
+                          context: context,
+                          builder:
+                              (context) => CheckService(
+                                value: check,
+                                onChanged: (val) {
+                                  setState(() {
+                                    check = val!;
+                                  });
+                                },
                               ),
-                            );
-                          }
-                        },
-                        icon: Icons.save,
-                      ),
-                      const SizedBox(width: 16),
-                      TextButton.icon(
-                        onPressed: () {
-                          Navigator.of(context).pushReplacement(
-                            MaterialPageRoute(
-                              builder: (context) => const SplashView(),
-                            ),
-                          );
-                        },
-                        icon: Icon(
-                          Icons.arrow_forward_ios,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ),
-                        label: Text(
-                          'تخطى',
-                          style: Theme.of(
-                            context,
-                          ).textTheme.bodyLarge!.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
-                        ),
-                      ),
-                    ],
+                        );
+                      }
+                    },
+                    icon: Icons.save,
                   ),
                 ],
               ),
