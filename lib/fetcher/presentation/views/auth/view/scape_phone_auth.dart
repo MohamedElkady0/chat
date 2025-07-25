@@ -3,9 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
-import 'package:my_chat/fetcher/presentation/views/auth/widget/check_service.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/fun_service.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/image_auth.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/input_field_auth.dart';
+import 'package:my_chat/fetcher/presentation/views/splach/splash_view.dart';
 
 class ScapePhoneAuth extends StatefulWidget {
   const ScapePhoneAuth({super.key});
@@ -17,7 +18,7 @@ class ScapePhoneAuth extends StatefulWidget {
 class _ScapePhoneAuthState extends State<ScapePhoneAuth> {
   final TextEditingController nameController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
-  bool check = false;
+  bool agree = false;
 
   @override
   void dispose() {
@@ -29,68 +30,113 @@ class _ScapePhoneAuthState extends State<ScapePhoneAuth> {
   Widget build(BuildContext context) {
     ConfigApp.initConfig(context);
     double height = ConfigApp.height;
-    return SafeArea(
-      child: Scaffold(
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Form(
-            key: formKey,
+    return BlocConsumer<AuthCubit, AuthState>(
+      listener: (context, state) {
+        if (state is AuthFailure) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(state.message)));
+        } else if (state is AuthSuccess) {
+          ScaffoldMessenger.of(context).clearSnackBars();
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Welcome ${state.userInfo.name}')),
+          );
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const SplashView()),
+          );
+        }
+      },
+      builder: (context, state) {
+        return state is AuthLoading
+            ? Center(child: CircularProgressIndicator())
+            : SafeArea(
+              child: Scaffold(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                body: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Form(
+                    key: formKey,
 
-            child: ConstrainedBox(
-              constraints: BoxConstraints(
-                minHeight:
-                    MediaQuery.of(context).size.height -
-                    kToolbarHeight -
-                    MediaQuery.of(context).padding.top,
-              ),
-              child: Column(
-                children: [
-                  SizedBox(height: height * 0.1),
-                  ImageAuth(),
-                  SizedBox(height: height * 0.08),
-                  InputFieldAuth(
-                    controller: nameController,
-                    title: 'Name',
-                    icon: Icons.person,
-                    obscureText: false,
-                  ),
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        minHeight:
+                            MediaQuery.of(context).size.height -
+                            kToolbarHeight -
+                            MediaQuery.of(context).padding.top,
+                      ),
+                      child: Column(
+                        children: [
+                          SizedBox(height: height * 0.1),
+                          ImageAuth(),
+                          SizedBox(height: height * 0.08),
+                          InputFieldAuth(
+                            controller: nameController,
+                            title: 'Name',
+                            icon: Icons.person,
+                            obscureText: false,
+                          ),
 
-                  SizedBox(height: height * 0.3),
+                          SizedBox(height: height * 0.3),
 
-                  ButtonAuth(
-                    isW: false,
-                    title: 'متابعة',
-                    onPressed: () async {
-                      if (formKey.currentState!.validate()) {
-                        formKey.currentState!.save();
-                        final authCubit = context.read<AuthCubit>();
-                        authCubit.uploadAndUpdateProfileImage();
+                          ButtonAuth(
+                            isW: false,
+                            title: 'متابعة',
+                            onPressed: () async {
+                              if (formKey.currentState!.validate()) {
+                                formKey.currentState!.save();
 
-                        authCubit.updateName(nameController.text);
+                                final authCubit = BlocProvider.of<AuthCubit>(
+                                  context,
+                                );
+                                final scaffoldMessenger = ScaffoldMessenger.of(
+                                  context,
+                                );
 
-                        showDialog(
-                          context: context,
-                          builder:
-                              (context) => CheckService(
-                                value: check,
-                                onChanged: (val) {
+                                final bool? didAgree = await funService(
+                                  context,
+                                  initialAgreeValue: agree,
+                                );
+
+                                if (!mounted) return;
+
+                                if (didAgree == true) {
                                   setState(() {
-                                    check = val!;
+                                    agree = true;
                                   });
-                                },
-                              ),
-                        );
-                      }
-                    },
-                    icon: Icons.save,
+
+                                  authCubit.uploadAndUpdateProfileImage();
+
+                                  authCubit.updateName(nameController.text);
+                                } else {
+                                  scaffoldMessenger.clearSnackBars();
+                                  scaffoldMessenger.showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'يجب الموافقة على شروط الخدمة لإكمال التسجيل',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).clearSnackBars();
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Please fill all fields'),
+                                  ),
+                                );
+                              }
+                            },
+                            icon: Icons.save,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
+                ),
               ),
-            ),
-          ),
-        ),
-      ),
+            );
+      },
     );
   }
 }

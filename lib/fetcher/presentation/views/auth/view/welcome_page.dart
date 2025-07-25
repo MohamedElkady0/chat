@@ -9,7 +9,7 @@ import 'package:my_chat/fetcher/presentation/views/auth/view/login_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/view/phone_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/view/register_page.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/button_auth.dart';
-import 'package:my_chat/fetcher/presentation/views/auth/widget/check_service.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/fun_service.dart';
 import 'package:my_chat/fetcher/presentation/views/splach/splash_view.dart';
 
 class WelcomeScreen extends StatefulWidget {
@@ -80,9 +80,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
           ).showSnackBar(SnackBar(content: Text(state.message)));
         } else if (state is AuthSuccess) {
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Registration successful!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('welcome ${state.userInfo.name}')),
+          );
           Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => SplashView()),
           );
@@ -173,22 +173,41 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                                           isW: true,
                                           title: 'Google',
                                           icon: FontAwesomeIcons.google,
-                                          onPressed: () {
-                                            BlocProvider.of<AuthCubit>(
-                                              context,
-                                            ).signInWithGoogle();
-                                            showDialog(
-                                              context: context,
-                                              builder:
-                                                  (context) => CheckService(
-                                                    value: agree,
-                                                    onChanged: (val) {
-                                                      setState(() {
-                                                        agree = val!;
-                                                      });
-                                                    },
+                                          onPressed: () async {
+                                            final authCubit =
+                                                BlocProvider.of<AuthCubit>(
+                                                  context,
+                                                );
+                                            final scaffoldMessenger =
+                                                ScaffoldMessenger.of(context);
+
+                                            final bool? didAgree =
+                                                await funService(
+                                                  context,
+                                                  initialAgreeValue: agree,
+                                                );
+
+                                            if (!mounted) return;
+
+                                            if (didAgree == true) {
+                                              setState(() {
+                                                agree = true;
+                                              });
+
+                                              authCubit.signInWithGoogle();
+                                            } else {
+                                              if (!mounted) return;
+
+                                              scaffoldMessenger
+                                                  .clearSnackBars();
+                                              scaffoldMessenger.showSnackBar(
+                                                const SnackBar(
+                                                  content: Text(
+                                                    'يجب الموافقة على شروط الخدمة لإكمال التسجيل',
                                                   ),
-                                            );
+                                                ),
+                                              );
+                                            }
                                           },
                                         ),
                                         AppSpacing.vSpaceM,

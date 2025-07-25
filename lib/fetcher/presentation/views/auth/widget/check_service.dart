@@ -2,15 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/policy_of_service.dart';
 
 class CheckService extends StatelessWidget {
-  const CheckService({super.key, required this.value, this.onChanged});
+  const CheckService({
+    super.key,
+    required this.value,
+    this.onChanged,
+    required this.onPressed,
+    required this.onCancel,
+  });
   final bool value;
   final Function(bool?)? onChanged;
+  final void Function()? onPressed;
+  final void Function()? onCancel;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog.adaptive(
-      title: const Text('تأكيد الخدمة'),
-      content: PolicyOfServiceWidget(),
+      title: const Text('شروط الخدمة'),
+      content: const PolicyOfServiceWidget(),
       actions: [
         CheckboxListTile.adaptive(
           value: value,
@@ -18,21 +26,13 @@ class CheckService extends StatelessWidget {
           title: const Text('أوافق على شروط الخدمة'),
           controlAffinity: ListTileControlAffinity.leading,
         ),
-        ElevatedButton(
-          onPressed: () {
-            if (value) {
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('تمت الموافقة على شروط الخدمة')),
-              );
-            } else {
-              ScaffoldMessenger.of(context).clearSnackBars();
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('يجب الموافقة على شروط الخدمة')),
-              );
-            }
-          },
-          child: const Text('موافق'),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            TextButton(onPressed: onCancel, child: const Text('إلغاء')),
+            const SizedBox(width: 8),
+            ElevatedButton(onPressed: onPressed, child: const Text('موافق')),
+          ],
         ),
       ],
     );

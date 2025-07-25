@@ -30,9 +30,7 @@ class ChatMy extends StatelessWidget {
       providers: [
         BlocProvider<ThemeCubit>(create: (context) => ThemeCubit()),
 
-        BlocProvider<AuthCubit>(
-          create: (context) => AuthCubit()..checkAppState(),
-        ),
+        BlocProvider<AuthCubit>(create: (context) => AuthCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeState>(
         builder: (context, themeState) {

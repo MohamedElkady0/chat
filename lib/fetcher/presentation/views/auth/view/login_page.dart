@@ -122,13 +122,13 @@ class _LoginPageState extends State<LoginPage> {
                                 icon: Icons.login,
                                 onPressed: () {
                                   if (formKey.currentState!.validate()) {
+                                    formKey.currentState!.save();
                                     BlocProvider.of<AuthCubit>(
                                       context,
                                     ).onSignIn(
                                       email: emailController.text,
                                       password: passwordController.text,
                                     );
-                                    formKey.currentState!.save();
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(

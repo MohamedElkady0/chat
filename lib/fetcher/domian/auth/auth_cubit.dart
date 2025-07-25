@@ -1,15 +1,14 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
-
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
@@ -20,17 +19,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 part 'auth_state.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit() : super(AuthInitial());
-
-  late StreamSubscription _authSubscription;
-  final FirebaseAuth _credential = FirebaseAuth.instance;
-
   UserInfoData? _currentUserInfo;
-
   UserInfoData? get currentUserInfo => _currentUserInfo;
   set currentUserInfo(UserInfoData? userInfo) {
-    _currentUserInfo = userInfo;
-    emit(AuthInitial());
+    emit(AuthSuccess(userInfo: userInfo!));
   }
 
   bool isRegister = true;
@@ -43,15 +35,69 @@ class AuthCubit extends Cubit<AuthState> {
   String _phoneNumber = '';
   void setPhoneNumber(String value) => _phoneNumber = value;
   String get phoneNumber => _phoneNumber;
-
   final GoogleSignIn _googleSignIn = GoogleSignIn();
-
   LatLng? currentPosition;
   String currentAddress = 'لم يتم تحديد العنوان بعد';
   MapController? mapController;
   bool isLoading = true;
   SharedPreferences? prefs;
-  //final FacebookAuth _facebookAuthResult = FacebookAuth.instance;
+  // --------------------------------------------------
+
+  final FirebaseAuth _credential = FirebaseAuth.instance;
+  StreamSubscription? _authSubscription;
+
+  AuthCubit() : super(AuthInitial()) {
+    _monitorAuthenticationState();
+  }
+
+  void _monitorAuthenticationState() {
+    _authSubscription?.cancel();
+
+    _authSubscription = _credential.authStateChanges().listen((
+      User? user,
+    ) async {
+      final prefs = await SharedPreferences.getInstance();
+      final bool hasSeenOnboarding = prefs.getBool('seenOnboarding') ?? false;
+
+      if (!hasSeenOnboarding) {
+        emit(ShowOnboardingState());
+      } else {
+        if (user != null) {
+          emit(AuthLoading());
+          try {
+            emit(AuthSuccess(userInfo: _currentUserInfo!));
+          } catch (e) {
+            emit(
+              AuthFailure(
+                message: 'خطأ في تحميل بيانات المستخدم: ${e.toString()}',
+              ),
+            );
+          }
+          emit(AuthAuthenticated());
+        } else {
+          emit(AuthUnauthenticated());
+        }
+      }
+    });
+  }
+
+  Future<void> onIntroEnd() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('seenOnboarding', true);
+
+    final user = _credential.currentUser;
+    if (user != null) {
+      emit(AuthAuthenticated());
+    } else {
+      emit(AuthUnauthenticated());
+    }
+  }
+
+  @override
+  Future<void> close() {
+    _authSubscription?.cancel();
+    return super.close();
+  }
 
   Future<void> checkAppState() async {
     final prefs = await SharedPreferences.getInstance();
@@ -67,13 +113,6 @@ class AuthCubit extends Cubit<AuthState> {
         emit(AuthUnauthenticated());
       }
     }
-  }
-
-  Future<void> onIntroEnd() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('seenOnboarding', true);
-
-    emit(AuthUnauthenticated());
   }
 
   Future<void> getCurrentLocation() async {

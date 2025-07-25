@@ -4,7 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:my_chat/core/config/config_app.dart';
 import 'package:my_chat/core/config/fixed_sizes_app.dart';
 import 'package:my_chat/fetcher/domian/auth/auth_cubit.dart';
-import 'package:my_chat/fetcher/presentation/views/auth/widget/check_service.dart';
+import 'package:my_chat/fetcher/presentation/views/auth/widget/fun_service.dart';
 import 'package:my_chat/fetcher/presentation/views/auth/widget/image_auth.dart';
 import 'package:my_chat/fetcher/presentation/views/splach/splash_view.dart';
 
@@ -51,139 +51,160 @@ class _RegisterPageState extends State<RegisterPage> {
           ).showSnackBar(SnackBar(content: Text(state.message)));
         } else if (state is AuthSuccess) {
           ScaffoldMessenger.of(context).clearSnackBars();
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Registration successful!')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Welcome ${state.userInfo.name}')),
+          );
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => SplashView()),
+            MaterialPageRoute(builder: (context) => const SplashView()),
           );
         }
       },
       builder: (context, state) {
-        return SafeArea(
-          child: Scaffold(
-            appBar: AppBarAuth(title: 'Register'),
-            backgroundColor: Theme.of(context).colorScheme.primary,
-            extendBodyBehindAppBar: true,
-            body:
-                state is AuthLoading
-                    ? Center(child: CircularProgressIndicator())
-                    : Padding(
-                      padding: AppSpacing.horizontalS,
-                      child: SingleChildScrollView(
-                        child: Form(
-                          key: formKey,
-                          child: Column(
-                            children: [
-                              SizedBox(height: height * 0.15),
-                              ImageAuth(),
-                              SizedBox(height: height * 0.02),
-                              InputFieldAuth(
-                                controller: nameController,
-                                title: 'Name',
-                                icon: FontAwesomeIcons.person,
-                                obscureText: false,
-                                onSaved: (value) {
-                                  nameController.text = value ?? '';
-                                },
-                              ),
-                              SizedBox(height: height * 0.02),
-                              InputFieldAuth(
-                                controller: emailController,
-                                title: 'Email',
-                                icon: Icons.email,
-                                obscureText: false,
-                                onSaved: (value) {
-                                  emailController.text = value ?? '';
-                                },
-                              ),
-                              SizedBox(height: height * 0.02),
-                              InputFieldAuth(
-                                controller: passwordController,
-                                title: 'Password',
+        return state is AuthLoading
+            ? Center(child: CircularProgressIndicator())
+            : SafeArea(
+              child: Scaffold(
+                appBar: AppBarAuth(title: 'Register'),
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                extendBodyBehindAppBar: true,
+                body:
+                    state is AuthLoading
+                        ? Center(child: CircularProgressIndicator())
+                        : Padding(
+                          padding: AppSpacing.horizontalS,
+                          child: SingleChildScrollView(
+                            child: Form(
+                              key: formKey,
+                              child: Column(
+                                children: [
+                                  SizedBox(height: height * 0.15),
+                                  ImageAuth(),
+                                  SizedBox(height: height * 0.02),
+                                  InputFieldAuth(
+                                    controller: nameController,
+                                    title: 'Name',
+                                    icon: FontAwesomeIcons.person,
+                                    obscureText: false,
+                                    onSaved: (value) {
+                                      nameController.text = value ?? '';
+                                    },
+                                  ),
+                                  SizedBox(height: height * 0.02),
+                                  InputFieldAuth(
+                                    controller: emailController,
+                                    title: 'Email',
+                                    icon: Icons.email,
+                                    obscureText: false,
+                                    onSaved: (value) {
+                                      emailController.text = value ?? '';
+                                    },
+                                  ),
+                                  SizedBox(height: height * 0.02),
+                                  InputFieldAuth(
+                                    controller: passwordController,
+                                    title: 'Password',
 
-                                icon:
-                                    visibility
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                                    icon:
+                                        visibility
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
 
-                                obscureText: visibility,
-                                onPressed:
-                                    () => setState(() {
-                                      visibility = !visibility;
-                                    }),
-                                onSaved: (value) {
-                                  passwordController.text = value ?? '';
-                                },
-                              ),
-                              SizedBox(height: height * 0.02),
-                              InputFieldAuth(
-                                controller: confirmPasswordController,
-                                title: 'Confirm Password',
-                                icon:
-                                    visibilityConfirm
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                                    obscureText: visibility,
+                                    onPressed:
+                                        () => setState(() {
+                                          visibility = !visibility;
+                                        }),
+                                    onSaved: (value) {
+                                      passwordController.text = value ?? '';
+                                    },
+                                  ),
+                                  SizedBox(height: height * 0.02),
+                                  InputFieldAuth(
+                                    controller: confirmPasswordController,
+                                    title: 'Confirm Password',
+                                    icon:
+                                        visibilityConfirm
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
 
-                                obscureText: visibilityConfirm,
-                                onPressed:
-                                    () => setState(() {
-                                      visibilityConfirm = !visibilityConfirm;
-                                    }),
-                                onSaved:
-                                    (value) =>
-                                        confirmPasswordController.text =
-                                            value ?? '',
-                              ),
-                              SizedBox(height: height * 0.02),
+                                    obscureText: visibilityConfirm,
+                                    onPressed:
+                                        () => setState(() {
+                                          visibilityConfirm =
+                                              !visibilityConfirm;
+                                        }),
+                                    onSaved:
+                                        (value) =>
+                                            confirmPasswordController.text =
+                                                value ?? '',
+                                  ),
+                                  SizedBox(height: height * 0.02),
 
-                              SizedBox(height: height * 0.05),
-                              ButtonAuth(
-                                isW: true,
-                                title: 'Register',
-                                icon: Icons.person_add,
-                                onPressed: () {
-                                  if (formKey.currentState!.validate()) {
-                                    formKey.currentState!.save();
-                                    BlocProvider.of<AuthCubit>(
-                                      context,
-                                    ).onSignUp(
-                                      name: nameController.text,
-                                      email: emailController.text,
-                                      password: passwordController.text,
-                                    );
+                                  SizedBox(height: height * 0.05),
+                                  ButtonAuth(
+                                    isW: true,
+                                    title: 'Register',
+                                    icon: Icons.person_add,
 
-                                    showDialog(
-                                      context: context,
-                                      builder:
-                                          (context) => CheckService(
-                                            value: agree,
-                                            onChanged: (val) {
-                                              setState(() {
-                                                agree = val!;
-                                              });
-                                            },
+                                    onPressed: () async {
+                                      if (formKey.currentState!.validate()) {
+                                        formKey.currentState!.save();
+
+                                        final authCubit =
+                                            BlocProvider.of<AuthCubit>(context);
+                                        final scaffoldMessenger =
+                                            ScaffoldMessenger.of(context);
+
+                                        final bool? didAgree = await funService(
+                                          context,
+                                          initialAgreeValue: agree,
+                                        );
+
+                                        if (!mounted) return;
+
+                                        if (didAgree == true) {
+                                          setState(() {
+                                            agree = true;
+                                          });
+
+                                          authCubit.onSignUp(
+                                            name: nameController.text,
+                                            email: emailController.text,
+                                            password: passwordController.text,
+                                          );
+                                        } else {
+                                          scaffoldMessenger.clearSnackBars();
+                                          scaffoldMessenger.showSnackBar(
+                                            const SnackBar(
+                                              content: Text(
+                                                'يجب الموافقة على شروط الخدمة لإكمال التسجيل',
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).clearSnackBars();
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          const SnackBar(
+                                            content: Text(
+                                              'Please fill all fields',
+                                            ),
                                           ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(
-                                      context,
-                                    ).clearSnackBars();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Please fill all fields'),
-                                      ),
-                                    );
-                                  }
-                                },
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           ),
                         ),
-                      ),
-                    ),
-          ),
-        );
+              ),
+            );
       },
     );
   }
